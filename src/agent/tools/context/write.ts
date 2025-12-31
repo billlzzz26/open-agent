@@ -10,8 +10,39 @@ function isPathWithinDirectory(filePath: string, directory: string): boolean {
   return resolvedPath.startsWith(resolvedDir + path.sep) || resolvedPath === resolvedDir;
 }
 
-export const writeFileTool = tool({
-  needsApproval: true,
+const writeInputSchema = z.object({
+  filePath: z.string().describe("Absolute path to the file to write"),
+  content: z.string().describe("Content to write to the file"),
+});
+
+const editInputSchema = z.object({
+  filePath: z.string().describe("Absolute path to the file to edit"),
+  oldString: z.string().describe("The exact text to replace"),
+  newString: z
+    .string()
+    .describe("The text to replace it with (must differ from oldString)"),
+  replaceAll: z
+    .boolean()
+    .optional()
+    .describe("Replace all occurrences. Default: false"),
+});
+
+type WriteInput = z.infer<typeof writeInputSchema>;
+type EditInput = z.infer<typeof editInputSchema>;
+
+type WriteApprovalFn = (args: WriteInput) => boolean | Promise<boolean>;
+type EditApprovalFn = (args: EditInput) => boolean | Promise<boolean>;
+
+interface WriteToolOptions {
+  needsApproval?: boolean | WriteApprovalFn;
+}
+
+interface EditToolOptions {
+  needsApproval?: boolean | EditApprovalFn;
+}
+
+export const writeFileTool = (options?: WriteToolOptions) => tool({
+  needsApproval: options?.needsApproval ?? true,
   description: `Write content to a file on the filesystem.
 
 WHEN TO USE:
@@ -39,10 +70,7 @@ IMPORTANT:
 EXAMPLES:
 - Create a new test file: filePath: "/Users/username/project/src/user.test.ts", content: "<full file contents>"
 - Replace a script after reading it: filePath: "/Users/username/project/scripts/build.sh", content: "<entire updated script>"`,
-  inputSchema: z.object({
-    filePath: z.string().describe("Absolute path to the file to write"),
-    content: z.string().describe("Content to write to the file"),
-  }),
+  inputSchema: writeInputSchema,
   execute: async ({ filePath, content }, { experimental_context }) => {
     const context = experimental_context as AgentContext;
     const workingDirectory = context?.workingDirectory ?? process.cwd();
@@ -81,8 +109,8 @@ EXAMPLES:
   },
 });
 
-export const editFileTool = tool({
-  needsApproval: true,
+export const editFileTool = (options?: EditToolOptions) => tool({
+  needsApproval: options?.needsApproval ?? true,
   description: `Perform exact string replacement in a file.
 
 WHEN TO USE:
@@ -110,17 +138,7 @@ IMPORTANT:
 EXAMPLES:
 - Replace a single function call: filePath: "/Users/username/project/src/auth.ts", oldString: "login(user, password)", newString: "loginWithAudit(user, password)"
 - Rename a variable throughout a file: filePath: "/Users/username/project/src/api.ts", oldString: "oldApiClient", newString: "newApiClient", replaceAll: true`,
-  inputSchema: z.object({
-    filePath: z.string().describe("Absolute path to the file to edit"),
-    oldString: z.string().describe("The exact text to replace"),
-    newString: z
-      .string()
-      .describe("The text to replace it with (must differ from oldString)"),
-    replaceAll: z
-      .boolean()
-      .optional()
-      .describe("Replace all occurrences. Default: false"),
-  }),
+  inputSchema: editInputSchema,
   execute: async ({ filePath, oldString, newString, replaceAll = false }, { experimental_context }) => {
     const context = experimental_context as AgentContext;
     const workingDirectory = context?.workingDirectory ?? process.cwd();

@@ -9,3 +9,4 @@
 - [ ] pull in and cache context window size with models.dev
 - [ ] move subagent definition into it's own file
 - [ ] use toModelOutput to return just the last message / text part from the task tool. (update the system prompt to say summarize your work.)
+- [ ] update folders to be (fs, planning, memory, task)

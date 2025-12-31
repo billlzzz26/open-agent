@@ -642,6 +642,16 @@ export function ToolCall({
 
     case "tool-task": {
       const desc = part.input?.task ?? "Spawning subagent";
+      const subagentType = (part.input as { subagentType?: string })?.subagentType;
+      const taskApprovalRequested = part.state === "approval-requested";
+      const taskApprovalId = taskApprovalRequested
+        ? (part as { approval?: { id: string } }).approval?.id
+        : undefined;
+      const isTaskActiveApproval = taskApprovalId != null && taskApprovalId === activeApprovalId;
+      const taskDenied = part.state === "output-denied";
+      const taskDenialReason = taskDenied
+        ? (part as { approval?: { reason?: string } }).approval?.reason
+        : undefined;
 
       // The output is a UIMessage with parts (text, tool-invocation, etc.)
       // Preliminary results have preliminary: true, final result has preliminary: false/undefined
@@ -664,20 +674,59 @@ export function ToolCall({
       const isComplete = hasOutput && !isPreliminary;
       const isStreaming = hasOutput && isPreliminary;
 
-      const dotColor = isStreaming ? "yellow" : isComplete ? "green" : "yellow";
+      const dotColor = taskDenied 
+        ? "red" 
+        : taskApprovalRequested 
+          ? "yellow"
+          : isStreaming 
+            ? "yellow" 
+            : isComplete 
+              ? "green" 
+              : "yellow";
+      
+      // Format subagent type for display
+      const subagentLabel = subagentType === "explorer" 
+        ? "Explorer" 
+        : subagentType === "executor" 
+          ? "Executor" 
+          : "Task";
 
       return (
         <Box flexDirection="column" marginTop={1} marginBottom={1}>
           {/* Header */}
           <Box>
             {running || isStreaming ? <ToolSpinner /> : <Text color={dotColor}>● </Text>}
-            <Text bold color={running || isStreaming ? "yellow" : "white"}>
-              Task
+            <Text bold color={taskDenied ? "red" : running || isStreaming || taskApprovalRequested ? "yellow" : "white"}>
+              {subagentLabel}
             </Text>
             <Text color="gray">(</Text>
             <Text color="cyan">{desc}</Text>
             <Text color="gray">)</Text>
           </Box>
+
+          {/* Executor approval warning */}
+          {taskApprovalRequested && subagentType === "executor" && (
+            <Box paddingLeft={2} marginTop={1}>
+              <Text color="yellow">
+                This executor has full write access and can create, modify, and delete files.
+              </Text>
+            </Box>
+          )}
+
+          {/* Approval buttons */}
+          {isTaskActiveApproval && taskApprovalId && (
+            <ApprovalButtons approvalId={taskApprovalId} />
+          )}
+
+          {/* Denied message */}
+          {taskDenied && (
+            <Box paddingLeft={2}>
+              <Text color="gray">└ </Text>
+              <Text color="red">
+                Denied{taskDenialReason ? `: ${taskDenialReason}` : ""}
+              </Text>
+            </Box>
+          )}
 
           {/* Nested parts from subagent (text and tools in order) */}
           {hasOutput && visibleParts.length > 0 && (

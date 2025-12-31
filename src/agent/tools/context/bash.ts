@@ -79,8 +79,94 @@ async function executeCommand(
   });
 }
 
-export const bashTool = tool({
-  needsApproval: true,
+const bashInputSchema = z.object({
+  command: z.string().describe("The bash command to execute"),
+  cwd: z
+    .string()
+    .optional()
+    .describe("Working directory for the command (absolute path)"),
+});
+
+type BashInput = z.infer<typeof bashInputSchema>;
+type ApprovalFn = (args: BashInput) => boolean | Promise<boolean>;
+
+interface ToolOptions {
+  needsApproval?: boolean | ApprovalFn;
+}
+
+// Read-only commands that are safe to run without approval
+const SAFE_COMMAND_PREFIXES = [
+  "ls",
+  "cat",
+  "head",
+  "tail",
+  "find",
+  "grep",
+  "rg",
+  "git status",
+  "git log",
+  "git diff",
+  "git show",
+  "git branch",
+  "git remote",
+  "pwd",
+  "echo",
+  "which",
+  "type",
+  "file",
+  "wc",
+  "tree",
+];
+
+// Commands that should always require approval
+const DANGEROUS_COMMAND_PATTERNS = [
+  /\brm\b/,
+  /\bmv\b/,
+  /\bcp\b/,
+  /\bmkdir\b/,
+  /\btouch\b/,
+  /\bchmod\b/,
+  /\bchown\b/,
+  /\bsudo\b/,
+  /\bgit\s+(push|commit|add|reset|checkout|merge|rebase|stash)/,
+  /\bnpm\s+(install|uninstall|publish)/,
+  /\bpnpm\s+(install|uninstall|publish)/,
+  /\byarn\s+(add|remove|publish)/,
+  /\bbun\s+(add|remove|install)/,
+  /\bpip\s+install/,
+  />/,  // redirects
+  /\|/,  // pipes (could be dangerous)
+  /&&/,  // command chaining
+  /;/,   // command chaining
+];
+
+/**
+ * Check if a command is safe to run without approval.
+ * Returns true if approval is needed, false if safe.
+ */
+export function commandNeedsApproval(command: string): boolean {
+  const trimmedCommand = command.trim();
+  
+  // Check for dangerous patterns first
+  for (const pattern of DANGEROUS_COMMAND_PATTERNS) {
+    if (pattern.test(trimmedCommand)) {
+      return true;
+    }
+  }
+  
+  // Check if it starts with a safe command
+  for (const prefix of SAFE_COMMAND_PREFIXES) {
+    if (trimmedCommand.startsWith(prefix)) {
+      return false;
+    }
+  }
+  
+  // Default to requiring approval for unknown commands
+  return true;
+}
+
+export const bashTool = (options?: ToolOptions) => tool({
+  needsApproval: options?.needsApproval ?? true,
   description: `Execute a bash command in the user's shell (non-interactive).
 
 WHEN TO USE:
@@ -117,13 +203,7 @@ EXAMPLES:
 - Run the test suite: command: "npm test", cwd: "/Users/username/project"
 - Check git status: command: "git status --short"
 - List files in src: command: "ls -la", cwd: "/Users/username/project/src"`,
-  inputSchema: z.object({
-    command: z.string().describe("The bash command to execute"),
-    cwd: z
-      .string()
-      .optional()
-      .describe("Working directory for the command (absolute path)"),
-  }),
+  inputSchema: bashInputSchema,
   execute: async ({ command, cwd }, { experimental_context }) => {
     const context = experimental_context as AgentContext;
     const workingDirectory = context?.workingDirectory ?? process.cwd();
