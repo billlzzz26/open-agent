@@ -44,7 +44,7 @@ const callOptionsSchema = z.object({
   skills: z.custom<SkillMetadata[]>().optional(),
 });
 
-export type DeepAgentCallOptions = z.infer<typeof callOptionsSchema>;
+export type OpenHarnessAgentCallOptions = z.infer<typeof callOptionsSchema>;
 
 export const defaultModel = gateway("anthropic/claude-haiku-4.5");
 export const defaultModelLabel = defaultModel.modelId;
@@ -62,7 +62,7 @@ const tools = {
   skill: skillTool,
 } satisfies ToolSet;
 
-export const deepAgent = new ToolLoopAgent({
+export const openHarnessAgent = new ToolLoopAgent({
   model: defaultModel,
   instructions: buildSystemPrompt({}),
   tools,
@@ -77,7 +77,7 @@ export const deepAgent = new ToolLoopAgent({
   prepareCall: ({ options, model, ...settings }) => {
     if (!options) {
       throw new Error(
-        "Deep agent requires call options with sandbox and approval config.",
+        "Open Harness agent requires call options with sandbox and approval config.",
       );
     }
     const approval: ApprovalConfig = options.approval;
@@ -112,7 +112,7 @@ export const deepAgent = new ToolLoopAgent({
 });
 
 export function extractTodosFromStep(
-  toolResults: Array<TypedToolResult<typeof deepAgent.tools>>,
+  toolResults: Array<TypedToolResult<typeof openHarnessAgent.tools>>,
 ): TodoItem[] | null {
   for (const result of toolResults) {
     if (!result.dynamic && result.toolName === "todo_write" && result.output) {
@@ -122,4 +122,4 @@ export function extractTodosFromStep(
   return null;
 }
 
-export type DeepAgent = typeof deepAgent;
+export type OpenHarnessAgent = typeof openHarnessAgent;
