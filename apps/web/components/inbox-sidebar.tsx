@@ -370,69 +370,75 @@ const SessionRow = memo(function SessionRow({
     };
   }, []);
 
+  const rowButton = (
+    <button
+      type="button"
+      className={`group relative flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-left outline-none transition-[background-color,opacity] cursor-pointer ${
+        isActive ? "bg-sidebar-active" : "hover:bg-muted/50"
+      } ${isPending ? "opacity-80" : "opacity-100"}`}
+      style={sessionRowPerformanceStyle}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={() => onSessionClick(session)}
+      onFocus={() => onSessionPrefetch(session)}
+      aria-busy={isPending}
+    >
+      {/* Status icon */}
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+        {getSessionStatusIcon(session)}
+      </span>
+
+      {/* Session name */}
+      <span className="min-w-0 flex-1 text-left">
+        <p
+          className={`truncate text-[13px] leading-5 ${
+            session.hasUnread && !isActive
+              ? "font-semibold text-foreground"
+              : "font-normal text-foreground/75"
+          }`}
+        >
+          {session.title}
+        </p>
+      </span>
+
+      {/* Right side: shrink-to-fit so diff stats never overlap title */}
+      <span className="flex shrink-0 items-center justify-end">
+        {showArchiveButton ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className="rounded p-0.5 text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                aria-label="Archive session"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onArchiveSession(session);
+                }}
+              >
+                <Archive className="h-3.5 w-3.5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={4}>
+              Archive session
+            </TooltipContent>
+          </Tooltip>
+        ) : hasDiff ? (
+          <DiffStats
+            added={session.linesAdded}
+            removed={session.linesRemoved}
+          />
+        ) : null}
+      </span>
+    </button>
+  );
+
+  if (isMobile) {
+    return rowButton;
+  }
+
   return (
     <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          className={`group relative flex w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-left outline-none transition-[background-color,opacity] cursor-pointer ${
-            isActive ? "bg-sidebar-active" : "hover:bg-muted/50"
-          } ${isPending ? "opacity-80" : "opacity-100"}`}
-          style={sessionRowPerformanceStyle}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          onClick={() => onSessionClick(session)}
-          onFocus={() => onSessionPrefetch(session)}
-          aria-busy={isPending}
-        >
-          {/* Status icon */}
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center">
-            {getSessionStatusIcon(session)}
-          </span>
-
-          {/* Session name */}
-          <span className="min-w-0 flex-1 text-left">
-            <p
-              className={`truncate text-[13px] leading-5 ${
-                session.hasUnread && !isActive
-                  ? "font-semibold text-foreground"
-                  : "font-normal text-foreground/75"
-              }`}
-            >
-              {session.title}
-            </p>
-          </span>
-
-          {/* Right side: shrink-to-fit so diff stats never overlap title */}
-          <span className="flex shrink-0 items-center justify-end">
-            {showArchiveButton ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className="rounded p-0.5 text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-                    aria-label="Archive session"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onArchiveSession(session);
-                    }}
-                  >
-                    <Archive className="h-3.5 w-3.5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top" sideOffset={4}>
-                  Archive session
-                </TooltipContent>
-              </Tooltip>
-            ) : hasDiff ? (
-              <DiffStats
-                added={session.linesAdded}
-                removed={session.linesRemoved}
-              />
-            ) : null}
-          </span>
-        </button>
-      </PopoverTrigger>
+      <PopoverTrigger asChild>{rowButton}</PopoverTrigger>
       <PopoverContent
         side="right"
         align="start"
