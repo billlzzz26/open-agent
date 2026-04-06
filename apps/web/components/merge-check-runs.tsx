@@ -293,9 +293,7 @@ export function CheckRunsList({
 
   const sorted = useMemo(
     () =>
-      [...checkRuns].sort(
-        (a, b) => stateOrder[a.state] - stateOrder[b.state],
-      ),
+      [...checkRuns].sort((a, b) => stateOrder[a.state] - stateOrder[b.state]),
     [checkRuns],
   );
 
@@ -342,15 +340,15 @@ export function CheckRunsList({
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <span className="text-sm font-medium text-foreground">Checks</span>
           <span className="truncate text-xs text-muted-foreground">
-            {showLoading
-              ? "Loading..."
-              : (
-                  <>
-                    {passed} passed
-                    {pending > 0 && `, ${pending} pending`}
-                    {failed > 0 && `, ${failed} failing`}
-                  </>
-                )}
+            {showLoading ? (
+              "Loading..."
+            ) : (
+              <>
+                {passed} passed
+                {pending > 0 && `, ${pending} pending`}
+                {failed > 0 && `, ${failed} failing`}
+              </>
+            )}
           </span>
         </div>
 
@@ -358,30 +356,19 @@ export function CheckRunsList({
           <>
             {/* Refresh icon (stop propagation so it doesn't toggle) */}
             {onRefresh && (
-              <span
-                role="button"
-                tabIndex={0}
+              <button
+                type="button"
                 aria-label="Refresh checks"
                 className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRefresh();
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    onRefresh();
-                  }
-                }}
               >
                 <RefreshCw
-                  className={cn(
-                    "h-3.5 w-3.5",
-                    isRefreshing && "animate-spin",
-                  )}
+                  className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")}
                 />
-              </span>
+              </button>
             )}
 
             {detailsOpen ? (
@@ -409,9 +396,7 @@ export function CheckRunsList({
                   ? "Switch to flat list"
                   : "Switch to grouped by status"
               }
-              title={
-                groupMode === "status" ? "Flat list" : "Group by status"
-              }
+              title={groupMode === "status" ? "Flat list" : "Group by status"}
             >
               {groupMode === "status" ? (
                 <List className="h-3.5 w-3.5" />
@@ -422,7 +407,12 @@ export function CheckRunsList({
           )}
 
           {/* pr-7 reserves space so check names truncate before the toggle button */}
-          <div className={cn("max-h-48 overflow-y-auto", showGroupToggle && "pr-7")}>
+          <div
+            className={cn(
+              "max-h-48 overflow-y-auto",
+              showGroupToggle && "pr-7",
+            )}
+          >
             {groupMode === "status" && showGroupToggle ? (
               <div className="space-y-1">
                 {groupOrder.map((state) => {

@@ -254,10 +254,7 @@ export function MergePrDialog({
   const allowedMethods = readiness?.allowedMethods ?? ["squash"];
   const hasMultipleMethods = allowedMethods.length > 1;
   const mergeDisabled =
-    isSubmitting ||
-    isLoadingReadiness ||
-    !readiness ||
-    !readiness.pr;
+    isSubmitting || isLoadingReadiness || !readiness || !readiness.pr;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -275,7 +272,6 @@ export function MergePrDialog({
         <MergePrDialogActions
           canViewDiff={canViewDiff}
           canOpenPullRequest={Boolean(pullRequestUrl)}
-          isSubmitting={isSubmitting}
           onOpenPullRequest={openPullRequest}
           onViewDiff={onViewDiff}
         />

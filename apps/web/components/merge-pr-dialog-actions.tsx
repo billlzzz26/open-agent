@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 type MergePrDialogActionsProps = {
   canViewDiff: boolean;
   canOpenPullRequest: boolean;
-  isSubmitting: boolean;
   onOpenPullRequest: () => void;
   onViewDiff?: () => void;
 };
@@ -12,7 +11,6 @@ type MergePrDialogActionsProps = {
 export function MergePrDialogActions({
   canViewDiff,
   canOpenPullRequest,
-  isSubmitting,
   onOpenPullRequest,
   onViewDiff,
 }: MergePrDialogActionsProps) {
