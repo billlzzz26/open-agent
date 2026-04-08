@@ -2821,9 +2821,16 @@ export function SessionChatContent({
                         {groupedRenderMessages.length === 0 &&
                           !hasPendingResponse && (
                             <div className="flex h-full min-h-[40vh] items-center justify-center">
-                              <p className="text-sm text-muted-foreground">
-                                Send a message to get started
-                              </p>
+                              {!isSandboxActive && !isArchived ? (
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                  <p>Sandbox is initializing…</p>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-muted-foreground">
+                                  Send a message to get started
+                                </p>
+                              )}
                             </div>
                           )}
                         {groupedRenderMessages.map(
