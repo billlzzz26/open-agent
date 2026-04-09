@@ -12,6 +12,7 @@ import {
   GitPullRequest,
   GitPullRequestClosed,
   Loader2,
+  Sparkles,
   SquareDot,
   SquareMinus,
   SquarePlus,
@@ -100,6 +101,7 @@ type GitPanelProps = {
   onMerged: (result: MergePullRequestResponse) => Promise<void> | void;
   onCloseAndArchiveClick: () => void;
   onFixChecks?: (failedRuns: PullRequestCheckRun[]) => Promise<void> | void;
+  onFixConflicts?: (baseBranchRef: string) => Promise<void> | void;
 
   // For inline commit
   hasSandbox: boolean;
@@ -755,12 +757,16 @@ function InlineMergePanel({
   onCloseAndArchiveClick,
   canCloseAndArchive,
   onFixChecks,
+  onFixConflicts,
+  isAgentWorking,
 }: {
   session: Session;
   onMerged: (result: MergePullRequestResponse) => Promise<void> | void;
   onCloseAndArchiveClick: () => void;
   canCloseAndArchive: boolean;
   onFixChecks?: (failedRuns: PullRequestCheckRun[]) => Promise<void> | void;
+  onFixConflicts?: (baseBranchRef: string) => Promise<void> | void;
+  isAgentWorking: boolean;
 }) {
   const [readiness, setReadiness] = useState<MergeReadinessResponse | null>(
     null,
@@ -907,11 +913,29 @@ function InlineMergePanel({
     }
   };
 
+  const forceBypassableReasons = new Set([
+    "Required checks are failing",
+    "Required checks are still pending",
+    "Required checks are still in progress",
+    "Branch protection requirements are not yet satisfied",
+  ]);
+  const nonBypassableReasons =
+    readiness?.reasons.filter(
+      (reason) => !forceBypassableReasons.has(reason),
+    ) ?? [];
+  const hasMergeConflicts = nonBypassableReasons.some((reason) =>
+    reason.toLowerCase().includes("merge conflict"),
+  );
+  const baseBranchRef = readiness?.pr?.baseBranch
+    ? `origin/${readiness.pr.baseBranch}`
+    : "origin/main";
+
   const canForce =
     readiness !== null &&
     !readiness.canMerge &&
     readiness.pr !== null &&
-    !isLoadingReadiness;
+    !isLoadingReadiness &&
+    nonBypassableReasons.length === 0;
 
   const handleForceClick = () => {
     if (forceConfirming) {
@@ -971,8 +995,50 @@ function InlineMergePanel({
         }}
         isRefreshing={isLoadingReadiness}
         isLoading={isLoadingReadiness && !readiness}
+        fixChecksDisabled={isAgentWorking}
         onFixChecks={onFixChecks}
       />
+
+      {nonBypassableReasons.length > 0 && (
+        <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-2.5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 space-y-1.5">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-500" />
+                <p className="text-xs font-medium text-foreground">
+                  Merge blocked
+                </p>
+              </div>
+              <ul className="ml-6 list-disc space-y-1 text-[10px] text-muted-foreground">
+                {nonBypassableReasons.map((reason) => (
+                  <li key={reason}>{reason}</li>
+                ))}
+              </ul>
+              {hasMergeConflicts && (
+                <p className="ml-6 text-[10px] text-muted-foreground">
+                  Fetch {baseBranchRef}, resolve the conflicts, and avoid
+                  rebasing.
+                </p>
+              )}
+            </div>
+            {hasMergeConflicts && onFixConflicts && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-7 shrink-0 text-xs"
+                disabled={isAgentWorking}
+                onClick={() => {
+                  void onFixConflicts(baseBranchRef);
+                }}
+              >
+                <Sparkles className="mr-1.5 h-3 w-3" />
+                Fix conflicts
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Delete branch toggle */}
       <div className="flex items-center justify-between rounded-md border border-border bg-muted/30 p-2.5">
@@ -1134,6 +1200,7 @@ export function GitPanel(props: GitPanelProps) {
     onMerged,
     onCloseAndArchiveClick,
     onFixChecks,
+    onFixConflicts,
     hasSandbox,
     gitStatus,
     refreshGitStatus,
@@ -1378,6 +1445,8 @@ export function GitPanel(props: GitPanelProps) {
                 onCloseAndArchiveClick={onCloseAndArchiveClick}
                 canCloseAndArchive={canCloseAndArchive}
                 onFixChecks={onFixChecks}
+                onFixConflicts={onFixConflicts}
+                isAgentWorking={isAgentWorking}
               />
             ) : hasRepo ? (
               <InlinePrCreatePanel

@@ -6,6 +6,7 @@ import {
   ChevronDown,
   GitMerge,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MergeReadinessResponse } from "@/app/api/sessions/[sessionId]/merge-readiness/route";
@@ -44,6 +45,8 @@ interface MergePrDialogProps {
   isAgentWorking?: boolean;
   /** Called when the user clicks "Fix errors" — receives all failing check runs */
   onFixChecks?: (failedRuns: PullRequestCheckRun[]) => Promise<void> | void;
+  /** Called when the user clicks "Fix conflicts" — receives the base branch ref */
+  onFixConflicts?: (baseBranchRef: string) => Promise<void> | void;
 }
 
 const mergeMethodLabels: Record<PullRequestMergeMethod, string> = {
@@ -73,6 +76,7 @@ export function MergePrDialog({
   canViewDiff = false,
   isAgentWorking = false,
   onFixChecks,
+  onFixConflicts,
 }: MergePrDialogProps) {
   const [readiness, setReadiness] = useState<MergeReadinessResponse | null>(
     null,
@@ -233,12 +237,30 @@ export function MergePrDialog({
     }
   };
 
+  const forceBypassableReasons = new Set([
+    "Required checks are failing",
+    "Required checks are still pending",
+    "Required checks are still in progress",
+    "Branch protection requirements are not yet satisfied",
+  ]);
+  const nonBypassableReasons =
+    readiness?.reasons.filter(
+      (reason) => !forceBypassableReasons.has(reason),
+    ) ?? [];
+  const hasMergeConflicts = nonBypassableReasons.some((reason) =>
+    reason.toLowerCase().includes("merge conflict"),
+  );
+  const baseBranchRef = readiness?.pr?.baseBranch
+    ? `origin/${readiness.pr.baseBranch}`
+    : "origin/main";
+
   // Whether the user can bypass failing checks via force merge
   const canForce =
     readiness !== null &&
     !readiness.canMerge &&
     readiness.pr !== null &&
-    !isLoadingReadiness;
+    !isLoadingReadiness &&
+    nonBypassableReasons.length === 0;
 
   const handleForceClick = () => {
     if (forceConfirming) {
@@ -304,6 +326,47 @@ export function MergePrDialog({
             fixChecksDisabled={isAgentWorking}
             onFixChecks={onFixChecks}
           />
+
+          {nonBypassableReasons.length > 0 && (
+            <div className="rounded-md border border-amber-500/30 bg-amber-500/10 p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-500" />
+                    <p className="text-sm font-medium text-foreground">
+                      Merge blocked
+                    </p>
+                  </div>
+                  <ul className="ml-6 list-disc space-y-1 text-xs text-muted-foreground">
+                    {nonBypassableReasons.map((reason) => (
+                      <li key={reason}>{reason}</li>
+                    ))}
+                  </ul>
+                  {hasMergeConflicts && (
+                    <p className="ml-6 text-xs text-muted-foreground">
+                      Fetch {baseBranchRef}, resolve the conflicts, and avoid
+                      rebasing.
+                    </p>
+                  )}
+                </div>
+                {hasMergeConflicts && onFixConflicts && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    disabled={isAgentWorking}
+                    onClick={() => {
+                      void onFixConflicts(baseBranchRef);
+                    }}
+                  >
+                    <Sparkles className="mr-2 h-3.5 w-3.5" />
+                    Fix conflicts
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center justify-between rounded-md border border-border bg-muted/30 p-3">
             <div className="space-y-0.5">

@@ -40,6 +40,7 @@ import useSWR from "swr";
 import type { ChatRefreshResponse } from "@/app/api/sessions/[sessionId]/chats/[chatId]/route";
 import type { MergePullRequestResponse } from "@/app/api/sessions/[sessionId]/merge/route";
 import type { PrDeploymentResponse } from "@/app/api/sessions/[sessionId]/pr-deployment/route";
+import type { PullRequestCheckRun } from "@/lib/github/client";
 import type {
   WebAgentCommitDataPart,
   WebAgentPrDataPart,
@@ -1670,6 +1671,46 @@ export function SessionChatContent({
     [chatInfo.id, sendMessage, setChatStreaming],
   );
 
+  const handleFixChecks = useCallback(
+    async (failedRuns: PullRequestCheckRun[]) => {
+      let text = "";
+      try {
+        const res = await fetch(`/api/sessions/${session.id}/checks/fix`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ checkRuns: failedRuns }),
+        });
+        if (res.ok) {
+          const data = (await res.json()) as { message: string };
+          text = data.message;
+        }
+      } catch {
+        // Fall through to fallback
+      }
+
+      if (!text) {
+        const names = failedRuns.map((run) => run.name).join(", ");
+        text = `# Fix Failing Checks\n\nThe following checks are failing: ${names}. Please investigate and push a fix.`;
+      }
+
+      await sendMessageWithPendingState({ text });
+    },
+    [sendMessageWithPendingState, session.id],
+  );
+
+  const handleFixConflicts = useCallback(
+    async (baseBranchRef: string, closeMergeDialog = false) => {
+      if (closeMergeDialog) {
+        setMergeDialogOpen(false);
+      }
+
+      await sendMessageWithPendingState({
+        text: `# Resolve Merge Conflicts\n\nThere is a merge conflict with ${baseBranchRef}. Fetch and then fix the conflicts. Do not rebase.`,
+      });
+    },
+    [sendMessageWithPendingState],
+  );
+
   const handleDeleteUserMessage = useCallback(
     async (messageId: string) => {
       if (hasMessageActionInFlight) {
@@ -2725,34 +2766,13 @@ export function SessionChatContent({
       onCreateRepoClick={() => setRepoDialogOpen(true)}
       onMerged={handleMerged}
       onCloseAndArchiveClick={() => setCloseDialogOpen(true)}
-      onFixChecks={async (failedRuns) => {
-        let text = "";
-        try {
-          const res = await fetch(`/api/sessions/${session.id}/checks/fix`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ checkRuns: failedRuns }),
-          });
-          if (res.ok) {
-            const data = (await res.json()) as { message: string };
-            text = data.message;
-          }
-        } catch {
-          // Fall through to fallback
-        }
-
-        if (!text) {
-          const names = failedRuns.map((r) => r.name).join(", ");
-          text = `# Fix Failing Checks\n\nThe following checks are failing: ${names}. Please investigate and push a fix.`;
-        }
-
-        void sendMessageWithPendingState({ text });
-      }}
+      onFixChecks={handleFixChecks}
+      onFixConflicts={(baseBranchRef) => handleFixConflicts(baseBranchRef)}
       hasSandbox={sandboxInfo !== null}
       gitStatus={gitStatus}
       refreshGitStatus={refreshGitStatus}
       onCommitted={handleCommitted}
-      isAgentWorking={isChatInFlight}
+      isAgentWorking={hasPendingResponse || isChatInFlight}
       onPrDetected={(pr) => {
         updateSessionPullRequest(pr);
         void refreshGitStatus().catch(() => {});
@@ -3950,32 +3970,11 @@ export function SessionChatContent({
           isAgentWorking={hasPendingResponse || isChatInFlight}
           onFixChecks={async (failedRuns) => {
             setMergeDialogOpen(false);
-
-            let text = "";
-            try {
-              const res = await fetch(
-                `/api/sessions/${session.id}/checks/fix`,
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ checkRuns: failedRuns }),
-                },
-              );
-              if (res.ok) {
-                const data = (await res.json()) as { message: string };
-                text = data.message;
-              }
-            } catch {
-              // Fall through to fallback
-            }
-
-            if (!text) {
-              const names = failedRuns.map((r) => r.name).join(", ");
-              text = `# Fix Failing Checks\n\nThe following checks are failing: ${names}. Please investigate and push a fix.`;
-            }
-
-            void sendMessageWithPendingState({ text });
+            await handleFixChecks(failedRuns);
           }}
+          onFixConflicts={(baseBranchRef) =>
+            handleFixConflicts(baseBranchRef, true)
+          }
         />
       )}
 
