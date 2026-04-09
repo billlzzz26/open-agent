@@ -425,15 +425,6 @@ function InlineCommitPanel({
     );
   }
 
-  // No uncommitted changes
-  if (!hasPendingGitWork) {
-    return (
-      <div className="px-2 py-3 text-center text-xs text-muted-foreground">
-        No uncommitted changes
-      </div>
-    );
-  }
-
   // Commit form
   return (
     <div className="space-y-2">
@@ -441,14 +432,14 @@ function InlineCommitPanel({
         placeholder="Commit message (optional)"
         value={commitTitle}
         onChange={(e) => setCommitTitle(e.target.value)}
-        disabled={isCommitting}
+        disabled={isCommitting || !hasPendingGitWork}
         className="h-7 text-xs"
       />
       <Textarea
         placeholder="Description (optional)"
         value={commitBody}
         onChange={(e) => setCommitBody(e.target.value)}
-        disabled={isCommitting}
+        disabled={isCommitting || !hasPendingGitWork}
         rows={2}
         className="resize-none text-xs field-sizing-fixed"
       />
@@ -456,7 +447,7 @@ function InlineCommitPanel({
         size="sm"
         className="w-full text-xs"
         onClick={() => void handleCommit()}
-        disabled={isCommitting || !hasSandbox}
+        disabled={isCommitting || !hasSandbox || !hasPendingGitWork}
       >
         {isCommitting ? (
           <>
