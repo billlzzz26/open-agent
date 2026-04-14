@@ -79,7 +79,7 @@ export function LandingBento() {
               that ships.
             </h2>
           </div>
-          <div>
+          <div className="md:pl-10">
             <p className="max-w-md text-balance text-base leading-relaxed text-(--l-fg-2)">
               Built on production-grade primitives from the Vercel ecosystem. No
               synthetic demos &mdash; real infrastructure for real agents.
