@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "oxc.oxc-vscode",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+    "esbenp.prettier-vscode",
+    "EditorConfig.EditorConfig"
+  ]
+}
