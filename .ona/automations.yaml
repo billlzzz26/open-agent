@@ -1,0 +1,15 @@
+tasks:
+  install:
+    name: Install dependencies
+    description: Install all workspace dependencies with frozen lockfile.
+    command: bun install --frozen-lockfile
+    triggeredBy:
+      - postDevcontainerStart
+
+services:
+  web:
+    name: Web Dev Server
+    description: Next.js development server for apps/web.
+    commands:
+      start: bun run web
+      ready: curl -sf http://localhost:3000
