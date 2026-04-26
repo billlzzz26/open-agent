@@ -2,132 +2,139 @@
 name: todo
 created: 2026-04-27
 updated: 2026-04-27
-arthur: billlzzz26
+author: billlzzz26
 ---
 
-# แผนการพัฒนาโปรเจกต์ Open-Agents (TDD Lifecycle)
+# Open-Agent Development Roadmap
 
->แผนการพัฒนานี้แบ่งออกเป็น 14 เฟส โดยยึดหลักการพัฒนาแบบ Test-Driven Development (TDD) คือการเขียน Test ก่อนการ Implement เสมอ เพื่อให้มั่นใจในคุณภาพของโค้ดและลดข้อผิดพลาดที่อาจเกิดขึ้น
+> Open-Agent is a v0-like code generation platform that enables AI-driven development for GitHub repositories. This roadmap outlines the key features and improvements needed to complete the platform.
 
-## Phase 1: โครงสร้างพื้นฐานและส่วนประกอบกลาง (Core Infrastructure & Shared Components)
+## Phase 1: Environment Setup & Configuration (Core Infrastructure)
 
-- [ ] **Test:** เขียน Unit/Integration Tests สำหรับการตั้งค่าโปรเจกต์ใหม่และ Shared Schemas/Types
-- [ ] **Task:**
-  - [ ] สร้างโปรเจกต์ `apps/api` และ `apps/worker` ใน Monorepo
-  - [ ] กำหนด Shared Schemas/Types ที่จำเป็นใน `packages/shared` (เช่น `document.schema.ts`, `timeblock.schema.ts`, `generation.schema.ts`)
-  - [ ] Implement ระบบ Authentication และ User Management พื้นฐาน (ใช้ตาราง `users`, `accounts`, `authSessions`, `sessions` ที่มีอยู่แล้ว)
+- [x] **Setup:** Project structure with Monorepo (Turbo)
+- [x] **Setup:** Next.js 16 Web App (`apps/web`) with AI SDK 6
+- [x] **Setup:** BetterAuth for authentication
+- [x] **Setup:** Database schema with PostgreSQL
+- [ ] **Fix:** Set `BETTER_AUTH_SECRET` environment variable
+- [ ] **Fix:** Set `POSTGRES_URL` environment variable
+- [ ] **Verify:** Turbo configuration and build outputs
 
-## Phase 2: การจัดการเอกสาร (Document Management) - Server-side
+## Phase 2: GitHub Integration & Repository Management
 
-- [ ] **Test:** เขียน Unit/Integration Tests สำหรับ API ของ Documents (CRUD operations)
-- [ ] **Task:**
-  - [ ] Implement `documents` schema ใน `apps/api/db/schema.ts` ตาม SPEC ข้อ 7.1
-  - [ ] พัฒนา API Endpoints สำหรับ CRUD operations บน Documents ใน `apps/api/routes/documents.ts` และ `apps/api/controllers/documents.controller.ts`
-  - [ ] Implement `document.service.ts` สำหรับ Business Logic ของ Documents
+- [x] **Feature:** GitHub OAuth App integration
+- [x] **Feature:** Repository listing and browsing
+- [x] **Feature:** User and organization info retrieval
+- [ ] **Improve:** GitHub app installation status tracking
+- [ ] **Improve:** Handle multiple GitHub accounts
+- [ ] **Improve:** Repository fork and branch creation workflows
 
-## Phase 3: การจัดการเอกสาร (Document Management) - Client-side Web
+## Phase 3: AI-Powered Code Generation & Chat
 
-- [ ] **Test:** เขียน End-to-End Tests สำหรับ Workflow การแก้ไขเอกสารบน Web UI
-- [ ] **Task:**
-  - [ ] Implement Features ที่เกี่ยวข้องกับ Documents ใน `apps/web/features/documents` (API calls, hooks, mutations, queries)
-  - [ ] พัฒนา `document-editor.tsx` และ UI Components ที่เกี่ยวข้องใน `apps/web/components/editor`
-  - [ ] เชื่อมต่อ Editor กับ Local State (`editor-store.ts`) และ Server API
+- [x] **Feature:** Chat interface with AI models
+- [x] **Feature:** Streaming responses with Vercel AI SDK
+- [x] **Feature:** Tool/skill execution for code generation
+- [x] **Feature:** Multiple LLM model support
+- [ ] **Improve:** Context window management for large files
+- [ ] **Improve:** Code generation accuracy and testing
+- [ ] **Improve:** Skill/tool library organization
 
-## Phase 4: การจัดการ Timeblock (Timeblock Management) - Server-side
+## Phase 4: Workspace & Sandbox Environment
 
-- [ ] **Test:** เขียน Unit/Integration Tests สำหรับ API ของ Timeblocks (CRUD operations)
-- [ ] **Task:**
-  - [ ] Implement `timeblocks` schema ใน `apps/api/db/schema.ts` ตาม SPEC ข้อ 7.2
-  - [ ] พัฒนา API Endpoints สำหรับ CRUD operations บน Timeblocks ใน `apps/api/routes/timeblocks.ts` และ `apps/api/controllers/timeblocks.controller.ts`
-  - [ ] Implement `timeblock.service.ts` สำหรับ Business Logic ของ Timeblocks
+- [x] **Feature:** Vercel Sandbox integration for code execution
+- [x] **Feature:** Dev server management
+- [x] **Feature:** Code editor with file system
+- [x] **Feature:** Preview/live reload
+- [ ] **Improve:** Sandbox stability and error recovery
+- [ ] **Improve:** Performance of large projects
+- [ ] **Feature:** Custom environment setup support
 
-## Phase 5: การจัดการ Timeblock (Timeblock Management) - Client-side Web
+## Phase 5: Git Operations & Version Control
 
-- [ ] **Test:** เขียน End-to-End Tests สำหรับ Workflow การจัดการ Timeblock บน Web UI
-- [ ] **Task:**
-  - [ ] Implement Features ที่เกี่ยวข้องกับ Timeblocks ใน `apps/web/features/timeblocks` (API calls, hooks, mutations, queries)
-  - [ ] พัฒนา UI Components สำหรับ Timeblock Editor, List, Timeline, Heatmap ใน `apps/web/components/calendar`
-  - [ ] เชื่อมต่อ Calendar UI กับ Local State (`calendar-store.ts`) และ Server API
+- [x] **Feature:** Git diff viewing and visualization
+- [x] **Feature:** File change tracking
+- [x] **Feature:** Commit and push operations
+- [x] **Feature:** PR generation and management
+- [ ] **Improve:** Merge conflict resolution
+- [ ] **Improve:** Branch management UI
+- [ ] **Feature:** Git history and blame integration
 
-## Phase 6: Local-first และการ Sync (Core Local-first & Sync)
+## Phase 6: Workflow System & Task Automation
 
-- [ ] **Test:** เขียน Unit/Integration Tests สำหรับ Local-first Operations และ Sync Queue
-- [ ] **Task:**
-  - [ ] ตั้งค่า `packages/local-db` พร้อม Schemas และ Repositories สำหรับ Documents และ Timeblocks
-  - [ ] Implement Core Sync Logic ใน `apps/web` (เช่น `lib/sync.ts`, `hooks/use-offline-queue.ts`, `store/sync-store.ts`)
-  - [ ] พัฒนา UI Components สำหรับแสดงสถานะ Sync (`offline-badge.tsx`, `sync-progress.tsx`) ใน `apps/web/components/sync`
-  - [ ] Implement `sync_state` schema ใน `apps/api/db/schema.ts` ตาม SPEC ข้อ 7.4
-  - [ ] พัฒนา API Endpoints สำหรับ Sync Operations ใน `apps/api/routes/sync.ts` และ `apps/api/controllers/sync.controller.ts`
+- [x] **Feature:** Vercel Workflow SDK integration
+- [x] **Feature:** Multi-step workflow support
+- [x] **Feature:** Webhook handling
+- [ ] **Improve:** Workflow state persistence
+- [ ] **Improve:** Error handling and recovery
+- [ ] **Improve:** Workflow UI and management
 
-## Phase 7: AI Generation (Server-side)
+## Phase 7: Session & Chat Management
 
-- [ ] **Test:** เขียน Unit/Integration Tests สำหรับ AI Generation API และ Worker Processing
-- [ ] **Task:**
-  - [ ] Implement `generations` schema ใน `apps/api/db/schema.ts` ตาม SPEC ข้อ 7.3
-  - [ ] พัฒนา API Endpoints สำหรับ AI Generation Requests ใน `apps/api/routes/generations.ts` และ `apps/api/controllers/generations.controller.ts`
-  - [ ] ตั้งค่า `apps/worker` พร้อม Job Processing พื้นฐานสำหรับ AI Tasks (เช่น `jobs/title-gen.ts`)
-  - [ ] Integrate LLM Client ใน `apps/api/integrations/llm.ts` และ `apps/worker/processors/llm-processor.ts`
-  - [ ] Implement `job_queue` schema ใน `apps/api/db/schema.ts` ตาม SPEC ข้อ 7.5
+- [x] **Feature:** Session creation and persistence
+- [x] **Feature:** Chat history and forking
+- [x] **Feature:** Chat sharing and public links
+- [ ] **Improve:** Session state synchronization
+- [ ] **Improve:** Chat export/import functionality
+- [ ] **Feature:** Collaborative sessions (real-time)
 
-## Phase 8: AI Generation (Client-side Web)
+## Phase 8: User Profiles & Account Management
 
-- [ ] **Test:** เขียน End-to-End Tests สำหรับ AI Generation Features บน Web UI
-- [ ] **Task:**
-  - [ ] Implement Features ที่เกี่ยวข้องกับ Generations ใน `apps/web/features/generations` (API calls, hooks)
-  - [ ] พัฒนา UI Components สำหรับ AI Suggestions (เช่น `title-suggestions.tsx`, `tag-suggestions.tsx`, `topic-suggestions.tsx`) และ Inline Commands ใน `apps/web/components/editor`
+- [x] **Feature:** User authentication with BetterAuth
+- [x] **Feature:** Profile management
+- [ ] **Improve:** Account settings and preferences
+- [ ] **Feature:** API key management for integrations
+- [ ] **Feature:** Usage tracking and analytics
+- [ ] **Feature:** Team/organization support
 
-## Phase 9: Search (Core & Full-text)
+## Phase 9: Code Quality & Testing Infrastructure
 
-- [ ] **Test:** เขียน Unit/Integration Tests สำหรับ Full-text Search Indexing และ Querying
-- [ ] **Task:**
-  - [ ] ตั้งค่า `packages/search` พร้อม Components สำหรับ Full-text Indexing (เช่น `fulltext/tokenizer.ts`, `fulltext/ranking.ts`)
-  - [ ] Implement `search_index` schema ใน `apps/api/db/schema.ts` ตาม SPEC ข้อ 7.6
-  - [ ] พัฒนา API Endpoints สำหรับ Full-text Search ใน `apps/api/routes/search.ts` และ `apps/api/controllers/search.controller.ts`
-  - [ ] Implement Search Index Update Job ใน `apps/worker/jobs/search-index.ts`
+- [x] **Test:** Unit tests for API routes and utilities
+- [x] **Test:** Stream recovery and error handling tests
+- [ ] **Improve:** Test coverage across all packages
+- [ ] **Feature:** End-to-end test suite
+- [ ] **Feature:** Performance benchmarking
+- [ ] **Feature:** Integration test framework
 
-## Phase 10: Search (Semantic & Client-side)
+## Phase 10: Documentation & Developer Experience
 
-- [ ] **Test:** เขียน Unit/Integration Tests สำหรับ Semantic Search และ End-to-End Tests สำหรับ Search UI
-- [ ] **Task:**
-  - [ ] Implement Components สำหรับ Semantic Search ใน `packages/search` (เช่น `semantic/embedding.ts`, `semantic/similarity.ts`, `semantic/vector-query.ts`)
-  - [ ] Implement `vector_refs` schema ใน `apps/api/db/schema.ts` ตาม SPEC ข้อ 7.7
-  - [ ] Integrate Vector Database Client ใน `apps/api/integrations/vector.ts` และ `apps/worker/processors/vector-processor.ts`
-  - [ ] พัฒนา UI Components สำหรับ Search (`workspace-search-box.tsx`, `search-result-list.tsx`, `search-filters.tsx`, `semantic-search-panel.tsx`) ใน `apps/web/components/search`
-  - [ ] เชื่อมต่อ Search UI กับ Local State (`search-store.ts`) และ Server API
+- [ ] **Docs:** Architecture documentation
+- [ ] **Docs:** Setup and development guide
+- [ ] **Docs:** API documentation
+- [ ] **Docs:** Skill/tool development guide
+- [ ] **Improve:** TypeScript type safety and inference
+- [ ] **Improve:** Error messages and logging
 
-## Phase 11: Webhooks และ Background Jobs
+## Phase 11: Performance & Scalability
 
-- [ ] **Test:** เขียน Unit/Integration Tests สำหรับ Webhook Delivery และ Background Job Execution
-- [ ] **Task:**
-  - [ ] Implement Webhook Event Schema (ตาม SPEC ข้อ 8.2) ใน `apps/api/db/schema.ts`
-  - [ ] พัฒนา API Endpoints สำหรับ Webhooks ใน `apps/api/routes/webhooks.ts` และ `apps/api/controllers/webhooks.controller.ts`
-  - [ ] Implement Webhook Delivery Job ใน `apps/worker/jobs/webhook.ts`
-  - [ ] ตั้งค่า Redis สำหรับ Job Status, Locks, Rate Limit ใน `packages/integrations/redis`
+- [ ] **Optimize:** Database query performance
+- [ ] **Optimize:** API response times
+- [ ] **Feature:** Caching strategy (Redis)
+- [ ] **Feature:** Rate limiting and quotas
+- [ ] **Feature:** Database indexing
+- [ ] **Monitor:** Add monitoring and alerting
 
-## Phase 12: Desktop Application (Core)
+## Phase 12: Advanced Features & Integrations
 
-- [ ] **Test:** เขียน Unit/Integration Tests สำหรับ Local SQLite และ Sync Worker ใน Desktop App
-- [ ] **Task:**
-  - [ ] สร้างโปรเจกต์ `apps/desktop` (Tauri) พร้อมโครงสร้างพื้นฐาน
-  - [ ] ตั้งค่า Local SQLite เป็นฐานข้อมูลหลักสำหรับ Desktop App (`apps/desktop/src-tauri/src/db.rs`)
-  - [ ] Implement Local-first Editor Functionality ใน Desktop App
-  - [ ] พัฒนา Sync Worker สำหรับ Desktop App (`apps/desktop/src-tauri/src/sync/`)
+- [ ] **Feature:** Vercel integration (env vars, deployments)
+- [ ] **Feature:** Multiple Git providers (GitLab, Bitbucket)
+- [ ] **Feature:** Slack/Discord notifications
+- [ ] **Feature:** Advanced AI features (image generation, etc.)
+- [ ] **Feature:** CLI tool for local development
+- [ ] **Feature:** Mobile-responsive improvements
 
-## Phase 13: การรวมระบบและปรับปรุงประสิทธิภาพ (Integration & Performance Optimization)
+## Phase 13: Security & Compliance
 
-- [ ] **Test:** เขียน End-to-End Tests สำหรับการทำงานร่วมกันของระบบทั้งหมด และ Performance Tests
-- [ ] **Task:**
-  - [ ] ตรวจสอบและปรับปรุงการทำงานร่วมกันระหว่าง `apps/web`, `apps/api`, `apps/worker`, `apps/desktop` และ `packages/*`
-  - [ ] Implement Caching Strategy โดยใช้ Redis (`packages/integrations/redis/cache.ts`)
-  - [ ] Implement Rate Limiting ใน `apps/api/middlewares/rate-limit.ts`
-  - [ ] ปรับปรุงประสิทธิภาพของ Database Queries และ API Responses
-  - [ ] ตั้งค่า Monitoring และ Logging สำหรับระบบทั้งหมด
+- [ ] **Security:** Input validation and sanitization
+- [ ] **Security:** CORS and CSRF protection
+- [ ] **Security:** API authentication and authorization
+- [ ] **Security:** Rate limiting and DDoS protection
+- [ ] **Security:** Data encryption at rest
+- [ ] **Compliance:** GDPR/Privacy compliance
 
-## Phase 14: การปรับใช้และเอกสารประกอบ (Deployment & Documentation)
+## Phase 14: Production & Deployment
 
-- [ ] **Test:** เขียน Deployment Tests และ User Acceptance Tests (UAT)
-- [ ] **Task:**
-  - [ ] จัดทำ Deployment Scripts และ Configuration สำหรับ Production Environment
-  - [ ] เขียน Technical Documentation สำหรับ Developer (API Docs, Architecture, Setup Guide)
-  - [ ] เขียน User Manual และ Help Documentation สำหรับ End-users
-  - [ ] จัดทำ Release Notes และ Versioning Strategy
+- [x] **Deploy:** Vercel deployment setup
+- [ ] **Deploy:** Database migrations in production
+- [ ] **Deploy:** Environment variable management
+- [ ] **Deploy:** Health checks and monitoring
+- [ ] **Deploy:** Rollback and recovery procedures
+- [ ] **Deploy:** Documentation for deployment
