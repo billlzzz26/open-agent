@@ -259,7 +259,8 @@ export async function evaluateSandboxLifecycle(
       lifecycleError: message,
     });
     console.error(
-      `[Lifecycle] Failed to evaluate sandbox lifecycle for session ${sessionId}:`,
+      "[Lifecycle] Failed to evaluate sandbox lifecycle for session %s:",
+      sessionId,
       error,
     );
     return { action: "failed", reason: message };
