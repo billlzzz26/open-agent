@@ -71,9 +71,12 @@ export async function fetchGitHubBranches(
   repo: string,
   limit?: number,
 ) {
+  const encodedOwner = encodeURIComponent(owner);
+  const encodedRepo = encodeURIComponent(repo);
+
   // Fetch repo info for default branch
   const repoInfo = await fetchGitHubAPI<GitHubRepoInfo>(
-    `/repos/${owner}/${repo}`,
+    `/repos/${encodedOwner}/${encodedRepo}`,
     token,
   );
   if (!repoInfo) return null;
@@ -89,7 +92,7 @@ export async function fetchGitHubBranches(
 
   while (page <= maxPages) {
     const branches = await fetchGitHubAPI<GitHubBranch[]>(
-      `/repos/${owner}/${repo}/branches?per_page=${perPage}&page=${page}`,
+      `/repos/${encodedOwner}/${encodedRepo}/branches?per_page=${perPage}&page=${page}`,
       token,
     );
 
