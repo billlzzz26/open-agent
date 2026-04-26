@@ -17,6 +17,12 @@ function normalizeGitHubLimit(limit: number | undefined): number | undefined {
     : undefined;
 }
 
+function isValidGitHubPathSegment(value: string): boolean {
+  // Conservative allow-list for owner/repo used in URL path segments.
+  // Allows alphanumerics plus GitHub-common separators.
+  return /^[A-Za-z0-9._-]{1,100}$/.test(value);
+}
+
 function parseRepoInfo(value: unknown): RepoInfo | null {
   if (!value || typeof value !== "object") {
     return null;
@@ -282,6 +288,13 @@ export async function GET(request: NextRequest) {
   if (!owner || !repo) {
     return NextResponse.json(
       { error: "Owner and repo parameters are required" },
+      { status: 400 },
+    );
+  }
+
+  if (!isValidGitHubPathSegment(owner) || !isValidGitHubPathSegment(repo)) {
+    return NextResponse.json(
+      { error: "Invalid owner or repo parameter" },
       { status: 400 },
     );
   }
