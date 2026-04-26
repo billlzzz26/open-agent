@@ -1,7 +1,7 @@
 ---
 name: todo
-created: 2026-04-27
-updated: 2026-04-27
+created: 2026-04-26T22:50:23Z
+updated: 2026-04-26T22:50:23Z
 author: billlzzz26
 project: Open-Agent (AI-Powered Code Generation Platform)
 description: v0-like code generation agent for GitHub repositories with AI-driven development
@@ -296,8 +296,8 @@ description: v0-like code generation agent for GitHub repositories with AI-drive
 
 ## Quick Links
 
-- **API Routes:** `/vercel/share/v0-project/apps/web/app/api/`
-- **Libraries:** `/vercel/share/v0-project/apps/web/lib/`
-- **Database:** `/vercel/share/v0-project/apps/web/lib/db/schema.ts`
-- **Auth Config:** `/vercel/share/v0-project/apps/web/lib/auth/`
-- **Package Config:** `/vercel/share/v0-project/turbo.json`, `package.json`
+- **API Routes:** `apps/web/app/api/`
+- **Libraries:** `apps/web/lib/`
+- **Database:** `apps/web/lib/db/schema.ts`
+- **Auth Config:** `apps/web/lib/auth/`
+- **Package Config:** `turbo.json`, `package.json`
