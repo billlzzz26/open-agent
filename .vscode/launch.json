@@ -8,7 +8,7 @@
       "command": "bun run web",
       "cwd": "${workspaceFolder}",
       "serverReadyAction": {
-        "pattern": "started server on .+, url: (https?://.+)",
+        "pattern": "(?:started server on .+, url: |- Local:\\s+)(https?://[^\\s]+)",
         "uriFormat": "%s",
         "action": "debugWithChrome"
       }
