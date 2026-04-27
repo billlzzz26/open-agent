@@ -1,0 +1,56 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "UTC",
+  "schedule": ["before 6am on Monday"],
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Group all non-major Bun workspace catalog dependencies",
+      "matchManagers": ["bun"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "bun dependencies (non-major)",
+      "automerge": false
+    },
+    {
+      "description": "Group AI SDK packages together — they version in lockstep",
+      "matchPackageNames": ["ai", "@ai-sdk/**"],
+      "groupName": "AI SDK",
+      "automerge": false
+    },
+    {
+      "description": "Group Radix UI packages together",
+      "matchPackageNames": ["@radix-ui/**"],
+      "groupName": "Radix UI",
+      "automerge": false
+    },
+    {
+      "description": "Group React and React DOM — must stay in sync",
+      "matchPackageNames": [
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom"
+      ],
+      "groupName": "React",
+      "automerge": false
+    },
+    {
+      "description": "Pin Bun runtime version — matches packageManager field",
+      "matchManagers": ["bun"],
+      "matchPackageNames": ["bun"],
+      "enabled": false
+    },
+    {
+      "description": "Automerge patch-level devDependency updates",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true,
+      "automergeType": "pr"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "automerge": false
+  }
+}
