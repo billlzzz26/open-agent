@@ -24,9 +24,9 @@ import {
   formatCodeActions,
   formatWorkspaceEdit,
   countEdits,
-} from "./lsp/index.js";
-import { runDirectoryDiagnostics } from "./diagnostics/index.js";
-import { ToolDefinition } from "./types.js";
+} from "./lsp/index";
+import { runDirectoryDiagnostics } from "./diagnostics/index";
+import { ToolDefinition } from "./types";
 
 /**
  * Helper to handle LSP errors gracefully.
