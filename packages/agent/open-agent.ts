@@ -19,9 +19,11 @@ import {
   readFileTool,
   skillTool,
   taskTool,
+  delegateTaskTool,
   todoWriteTool,
   webFetchTool,
   writeFileTool,
+  kiloTool,
 } from "./tools";
 
 export interface AgentModelSelection {
@@ -71,9 +73,11 @@ const tools = {
   glob: globTool(),
   bash: bashTool(),
   task: taskTool,
+  delegate_task: delegateTaskTool,
   ask_user_question: askUserQuestionTool,
   skill: skillTool,
   web_fetch: webFetchTool,
+  kilo: kiloTool,
 } satisfies ToolSet;
 
 export const openAgent = new ToolLoopAgent({
