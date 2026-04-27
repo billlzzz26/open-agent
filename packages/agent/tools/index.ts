@@ -11,9 +11,15 @@ export {
   type TaskToolUIPart,
 } from "./task";
 export {
+  delegateTaskTool,
+  type DelegateTaskToolOutput,
+  type DelegateTaskToolUIPart,
+} from "./delegate";
+export {
   askUserQuestionTool,
   type AskUserQuestionToolUIPart,
   type AskUserQuestionInput,
 } from "./ask-user-question";
 export { skillTool, type SkillToolInput } from "./skill";
 export { webFetchTool } from "./fetch";
+export { kiloTool } from "./kilo";
