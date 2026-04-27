@@ -27,6 +27,9 @@
     "test:verbose": "bun test --reporter=junit --reporter-outfile /dev/stdout",
     "clean:workspace": "bash scripts/clean-workspace.sh"
   },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  },
   "devDependencies": {
     "@shelve/cli": "^5.0.1",
     "oxfmt": "^0.43.0",
@@ -38,8 +41,5 @@
   "overrides": {
     "zod": "^4.3.6"
   },
-  "packageManager": "bun@1.2.14",
-  "dependencies": {
-    "@vercel/analytics": "^2.0.1"
-  }
+  "packageManager": "bun@1.2.14"
 }
