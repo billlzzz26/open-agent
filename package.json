@@ -38,5 +38,8 @@
   "overrides": {
     "zod": "^4.3.6"
   },
-  "packageManager": "bun@1.2.14"
+  "packageManager": "bun@1.2.14",
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
 }
