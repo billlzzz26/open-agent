@@ -77,7 +77,7 @@ const TokenSpan = ({ token }: { token: ThemedToken }) => (
 );
 
 // Line number styles using CSS counters
-const LINE_NUMBER_CLASSES = cn(
+const lineNumberClasses = cn(
   "block",
   "before:content-[counter(line)]",
   "before:inline-block",
@@ -98,7 +98,7 @@ const LineSpan = ({
   keyedLine: KeyedLine;
   showLineNumbers: boolean;
 }) => (
-  <span className={showLineNumbers ? LINE_NUMBER_CLASSES : "block"}>
+  <span className={showLineNumbers ? lineNumberClasses : "block"}>
     {keyedLine.tokens.length === 0
       ? "\n"
       : keyedLine.tokens.map(({ token, key }) => (

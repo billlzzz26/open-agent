@@ -10,7 +10,7 @@ import {
   getWorktreeNotepadPath,
   ensureOmcDir,
   validateWorkingDirectory,
-} from "../lib/worktree-paths.js";
+} from "../lib/worktree-paths";
 import {
   getPriorityContext,
   getWorkingMemory,
@@ -22,7 +22,7 @@ import {
   getNotepadStats,
   formatFullNotepad,
   DEFAULT_CONFIG,
-} from "../hooks/notepad/index.js";
+} from "../hooks/notepad/index";
 import { ToolDefinition } from "./types.js";
 
 const SECTION_NAMES: [string, ...string[]] = [

@@ -1,7 +1,7 @@
 import { describe, test, expect, mock, beforeEach, afterEach } from "bun:test";
 
 // Mock node-fetch
-const fetchMock = mock(async (_url: string, _options: RequestInit) => {
+const fetchMock = mock(async (unusedUrl: string, unusedOptions: RequestInit) => {
   return new Response(
     JSON.stringify({ jsonrpc: "2.0", result: { success: true }, id: 1 }),
     {
@@ -90,7 +90,7 @@ describe("Context7Client", () => {
 
       expect(fetchMock).toHaveBeenCalledTimes(3);
 
-      const bodies = fetchMock.mock.calls.map(([_, options]) =>
+      const bodies = fetchMock.mock.calls.map(([unusedUrl, options]) =>
         JSON.parse((options as RequestInit)?.body as string),
       );
 
@@ -102,7 +102,7 @@ describe("Context7Client", () => {
     test("should handle empty params", async () => {
       await client.call("test.method");
 
-      const [_, options] = fetchMock.mock.calls[0];
+      const [unusedUrl, options] = fetchMock.mock.calls[0];
       const body = JSON.parse((options as RequestInit)?.body as string);
       expect(body.params).toEqual({});
     });
@@ -204,7 +204,7 @@ describe("Context7Client", () => {
         arguments: params,
       });
 
-      const [_, options] = fetchMock.mock.calls[0];
+      const [unusedUrl, options] = fetchMock.mock.calls[0];
       const body = JSON.parse((options as RequestInit)?.body as string);
 
       expect(body.params.name).toBe("query-docs");
