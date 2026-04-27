@@ -19,7 +19,6 @@ USAGE:
 - Pushes the branch to origin
 - Uses the 'gh' CLI to create the PR`,
   inputSchema: z.object({
-    needsApproval: z.literal(true),
     branchName: z
       .string()
       .describe("The name of the new branch to create and push"),
