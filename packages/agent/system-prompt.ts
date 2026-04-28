@@ -44,10 +44,14 @@ function getModelDisplayName(modelId: string | undefined): string {
   if (!modelId) return "(no model specified)";
   if (isKiloModel(modelId)) {
     // Map auto models to friendly names
-    if (modelId === "kilo-auto/frontier") return "kilo-auto/frontier (Claude Opus 4.7 / Sonnet 4.6)";
-    if (modelId === "kilo-auto/balanced") return "kilo-auto/balanced (Qwen 3.6+ / GPT-5.3-codex / Claude Haiku 4.5)";
-    if (modelId === "kilo-auto/free") return "kilo-auto/free (curated free models)";
-    if (modelId === "kilo-auto/small") return "kilo-auto/small (Gemma 4 31B/26B)";
+    if (modelId === "kilo-auto/frontier")
+      return "kilo-auto/frontier (Claude Opus 4.7 / Sonnet 4.6)";
+    if (modelId === "kilo-auto/balanced")
+      return "kilo-auto/balanced (Qwen 3.6+ / GPT-5.3-codex / Claude Haiku 4.5)";
+    if (modelId === "kilo-auto/free")
+      return "kilo-auto/free (curated free models)";
+    if (modelId === "kilo-auto/small")
+      return "kilo-auto/small (Gemma 4 31B/26B)";
   }
   return modelId;
 }

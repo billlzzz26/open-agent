@@ -18,6 +18,7 @@ Schema lives in `apps/web/lib/db/schema.ts`. Migrations are managed by Drizzle K
 
 ```bash
 bun run --cwd apps/web db:generate   # Creates a new .sql migration file
+bun run --cwd apps/web db:studio     # Interactive DB browser
 ```
 
 Commit the generated `.sql` file alongside the schema change. **Do not use `db:push`** except for local throwaway databases.
@@ -48,8 +49,7 @@ turbo typecheck --filter=web # Type check web app only
 # Testing
 bun test                                              # Run all tests
 bun test path/to/file.test.ts                         # Run single test file
-bun test --watch                                      # Watch mode
-bun run test:verbose                                  # Run tests with JUnit reporter streamed to stdout (useful in non-interactive shells)
+bun test --watch                                      # Watch modebun run test:isolated                                 # Run each test file in isolated process (CI mode)bun run test:verbose                                  # Run tests with JUnit reporter streamed to stdout (useful in non-interactive shells)
 bun run test:verbose path/to/file.test.ts             # Same verbose output for a single test file
 ```
 
@@ -75,9 +75,12 @@ git add "apps/web/app/tasks/[id]/page.tsx"
 
 ## Architecture (Summary)
 
+Three-layer system:
 ```
-Web -> Agent (packages/agent) -> Sandbox (packages/sandbox)
+Web (Next.js 16) -> Agent (ToolLoopAgent from AI SDK) -> Sandbox (Vercel execution environment)
 ```
+
+Agent runs outside the sandbox for independent execution. Subagents handle specialized tasks.
 
 See [Architecture & Workspace Structure](docs/agents/architecture.md) for details.
 
@@ -98,6 +101,26 @@ See [Architecture & Workspace Structure](docs/agents/architecture.md) for detail
 - **Never use `any`** -- use `unknown` and narrow with type guards
 - **No `.js` extensions** in imports
 - **Ultracite** (oxlint + oxfmt) for linting and formatting (double quotes, 2-space indent)
+
+## Common Pitfalls
+
+See [Lessons Learned](docs/agents/lessons-learned.md) for hard-won pitfalls and gotchas.
+
+## Environment Variables
+
+For deployment, minimum required:
+
+- `POSTGRES_URL` - Neon DB connection
+- `JWE_SECRET` - Session encryption  
+- `ENCRYPTION_KEY` - Additional encryption
+
+See [apps/web/README.md](apps/web/README.md) for full list.
+
+## Key Files
+
+- [packages/agent/open-agent.ts](packages/agent/open-agent.ts) — ToolLoopAgent setup
+- [apps/web/lib/db/schema.ts](apps/web/lib/db/schema.ts) — Database schema
+- [apps/web/app/config.ts](apps/web/app/config.ts) — Agent configuration
 - **Zod** schemas for validation, derive types with `z.infer`
 
 See [Code Style & Patterns](docs/agents/code-style.md) for full conventions, tool implementation patterns, and dependency patterns.

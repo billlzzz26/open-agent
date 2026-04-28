@@ -104,7 +104,9 @@ export class KiloClient {
   constructor(apiKey?: string) {
     this.apiKey = apiKey || process.env.KILO_API_KEY || "";
     if (!this.apiKey) {
-      throw new Error("Kilo API key is required. Set KILO_API_KEY environment variable.");
+      throw new Error(
+        "Kilo API key is required. Set KILO_API_KEY environment variable.",
+      );
     }
   }
 
@@ -112,7 +114,7 @@ export class KiloClient {
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...options,
       headers: {
-        "Authorization": `Bearer ${this.apiKey}`,
+        Authorization: `Bearer ${this.apiKey}`,
         "Content-Type": "application/json",
         ...options?.headers,
       },
@@ -123,23 +125,30 @@ export class KiloClient {
       try {
         errorData = await response.json();
       } catch (e) {
-        throw new Error(`Kilo API Error ${response.status}: ${response.statusText}`);
+        throw new Error(
+          `Kilo API Error ${response.status}: ${response.statusText}`,
+        );
       }
       throw new Error(
         `Kilo API Error ${response.status}: ${
           errorData?.error?.message || response.statusText
-        }`
+        }`,
       );
     }
 
     return response.json() as Promise<T>;
   }
 
-  async chatCompletions(body: ChatCompletionRequest): Promise<ChatCompletionResponse> {
-    return this.request<ChatCompletionResponse>("/api/gateway/chat/completions", {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
+  async chatCompletions(
+    body: ChatCompletionRequest,
+  ): Promise<ChatCompletionResponse> {
+    return this.request<ChatCompletionResponse>(
+      "/api/gateway/chat/completions",
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      },
+    );
   }
 
   async fimCompletions(body: FIMRequest): Promise<any> {

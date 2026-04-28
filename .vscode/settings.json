@@ -67,5 +67,16 @@
   },
   "[chatagent]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.tabSize": 2,
+  "workbench.colorTheme": "GitHub Dark Dimmed",
+  "chat.mcp.serverSampling": {
+    "open-agent/.vscode/mcp.json: oraios/serena": {
+      "allowedModels": [
+        "copilot/auto",
+        "copilot/claude-haiku-4.5",
+        "copilot/gpt-5-mini"
+      ]
+    }
   }
 }

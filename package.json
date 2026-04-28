@@ -33,7 +33,7 @@
   "devDependencies": {
     "@shelve/cli": "^5.0.1",
     "oxfmt": "^0.43.0",
-    "oxlint": "1.57.0",
+    "oxlint": "^1.62.0",
     "turbo": "^2.5.4",
     "typescript": "^5",
     "ultracite": "7.4.0"

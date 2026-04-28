@@ -1,15 +1,17 @@
 import { describe, test, expect, mock, beforeEach, afterEach } from "bun:test";
 
 // Mock node-fetch
-const fetchMock = mock(async (unusedUrl: string, unusedOptions: RequestInit) => {
-  return new Response(
-    JSON.stringify({ jsonrpc: "2.0", result: { success: true }, id: 1 }),
-    {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    },
-  );
-});
+const fetchMock = mock(
+  async (unusedUrl: string, unusedOptions: RequestInit) => {
+    return new Response(
+      JSON.stringify({ jsonrpc: "2.0", result: { success: true }, id: 1 }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  },
+);
 
 mock.module("node-fetch", () => ({
   __esModule: true,

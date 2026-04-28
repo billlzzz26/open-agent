@@ -19,7 +19,11 @@ const STATE_ROOT_ENV = "OMG_STATE_ROOT";
 const HOOK_PROFILE_ENV = "OMG_HOOK_PROFILE";
 const DISABLED_HOOKS_ENV = "OMG_DISABLED_HOOKS";
 const ALLOW_DELEGATED_HOOKS_ENV = "OMG_ALLOW_DELEGATED_HOOKS";
-const DEFAULT_STATE_RELATIVE_PATH = path.join(".omg", "state", "learn-watch.json");
+const DEFAULT_STATE_RELATIVE_PATH = path.join(
+  ".omg",
+  "state",
+  "learn-watch.json",
+);
 const DEFAULT_DEEP_INTERVIEW_STATE_RELATIVE_PATH = path.join(
   ".omg",
   "state",
@@ -91,7 +95,12 @@ function isTruthy(value) {
     return false;
   }
   const normalized = value.trim().toLowerCase();
-  return normalized === "1" || normalized === "true" || normalized === "yes" || normalized === "on";
+  return (
+    normalized === "1" ||
+    normalized === "true" ||
+    normalized === "yes" ||
+    normalized === "on"
+  );
 }
 
 function isObject(value) {
@@ -110,7 +119,10 @@ function parseCsvEnv(value) {
 
 function isDelegatedSubagentTurn(hookInput) {
   const metadata = isObject(hookInput?.metadata) ? hookInput.metadata : {};
-  const lane = typeof hookInput?.lane === "string" ? hookInput.lane.trim().toLowerCase() : "";
+  const lane =
+    typeof hookInput?.lane === "string"
+      ? hookInput.lane.trim().toLowerCase()
+      : "";
   const subagent =
     typeof hookInput?.subagent === "string"
       ? hookInput.subagent.trim().toLowerCase()
@@ -118,7 +130,10 @@ function isDelegatedSubagentTurn(hookInput) {
         ? metadata.subagent.trim().toLowerCase()
         : "";
 
-  if (subagent && !["main", "primary", "root", "orchestrator", "director"].includes(subagent)) {
+  if (
+    subagent &&
+    !["main", "primary", "root", "orchestrator", "director"].includes(subagent)
+  ) {
     return true;
   }
 
@@ -222,11 +237,15 @@ function hashText(text) {
 }
 
 function buildEventKey(sessionId, transcriptPath, transcriptRaw) {
-  const sessionPart = typeof sessionId === "string" && sessionId ? sessionId : "unknown";
+  const sessionPart =
+    typeof sessionId === "string" && sessionId ? sessionId : "unknown";
   if (typeof transcriptRaw === "string") {
     return `${sessionPart}:transcript:${hashText(transcriptRaw)}`;
   }
-  const sourcePart = typeof transcriptPath === "string" && transcriptPath ? transcriptPath : "missing";
+  const sourcePart =
+    typeof transcriptPath === "string" && transcriptPath
+      ? transcriptPath
+      : "missing";
   return `${sessionPart}:transcript-missing:${sourcePart}`;
 }
 
@@ -235,17 +254,25 @@ function normalizeState(state) {
     return {};
   }
   return {
-    last_session_id: typeof state.last_session_id === "string" ? state.last_session_id : "",
-    last_event_key: typeof state.last_event_key === "string" ? state.last_event_key : "",
+    last_session_id:
+      typeof state.last_session_id === "string" ? state.last_session_id : "",
+    last_event_key:
+      typeof state.last_event_key === "string" ? state.last_event_key : "",
     last_prompted_session_id:
-      typeof state.last_prompted_session_id === "string" ? state.last_prompted_session_id : "",
+      typeof state.last_prompted_session_id === "string"
+        ? state.last_prompted_session_id
+        : "",
     last_reason: typeof state.last_reason === "string" ? state.last_reason : "",
     last_prompted_at:
       typeof state.last_prompted_at === "string" ? state.last_prompted_at : "",
-    last_user_message_count: Number.isFinite(Number(state.last_user_message_count))
+    last_user_message_count: Number.isFinite(
+      Number(state.last_user_message_count),
+    )
       ? Number(state.last_user_message_count)
       : 0,
-    last_actionable_message_count: Number.isFinite(Number(state.last_actionable_message_count))
+    last_actionable_message_count: Number.isFinite(
+      Number(state.last_actionable_message_count),
+    )
       ? Number(state.last_actionable_message_count)
       : 0,
   };
@@ -308,7 +335,11 @@ function isDeepInterviewLockActive(state, nowMs = Date.now()) {
 
   const status =
     typeof state.status === "string" ? state.status.trim().toLowerCase() : "";
-  if (["active", "locked", "in-progress", "running", "interviewing"].includes(status)) {
+  if (
+    ["active", "locked", "in-progress", "running", "interviewing"].includes(
+      status,
+    )
+  ) {
     return true;
   }
   if (
@@ -368,13 +399,20 @@ function asText(value) {
     return value;
   }
   if (Array.isArray(value)) {
-    return value.map((item) => asText(item)).filter(Boolean).join(" ");
+    return value
+      .map((item) => asText(item))
+      .filter(Boolean)
+      .join(" ");
   }
   if (value && typeof value === "object") {
     if (typeof value.text === "string") {
       return value.text;
     }
-    if (typeof value.content === "string" || Array.isArray(value.content) || (value.content && typeof value.content === "object")) {
+    if (
+      typeof value.content === "string" ||
+      Array.isArray(value.content) ||
+      (value.content && typeof value.content === "object")
+    ) {
       return asText(value.content);
     }
     if (typeof value.value === "string") {
@@ -385,10 +423,7 @@ function asText(value) {
 }
 
 function normalizeText(text) {
-  return text
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
+  return text.toLowerCase().replace(/\s+/g, " ").trim();
 }
 
 function containsAny(text, terms) {
@@ -436,7 +471,9 @@ function classifySession(userTexts) {
     nonEmptyCount,
     actionableCount,
     informationalOnly:
-      nonEmptyCount > 0 && actionableCount === 0 && informationalCount === nonEmptyCount,
+      nonEmptyCount > 0 &&
+      actionableCount === 0 &&
+      informationalCount === nonEmptyCount,
   };
 }
 
@@ -461,11 +498,13 @@ function loadLearnConfig(cwd) {
   }
 
   const minSessionLength =
-    Number.isFinite(Number(config.min_session_length)) && Number(config.min_session_length) > 0
+    Number.isFinite(Number(config.min_session_length)) &&
+    Number(config.min_session_length) > 0
       ? Number(config.min_session_length)
       : defaults.minSessionLength;
   const learnedSkillsPath =
-    typeof config.learned_skills_path === "string" && config.learned_skills_path.trim()
+    typeof config.learned_skills_path === "string" &&
+    config.learned_skills_path.trim()
       ? config.learned_skills_path.trim()
       : defaults.learnedSkillsPath;
   const promptOncePerSession =
@@ -524,7 +563,8 @@ async function main() {
   const nowMs = Date.now();
   const nowIso = new Date(nowMs).toISOString();
   const learnHookDisabled =
-    hookProfile === "minimal" || isHookDisabled(disabledHooks, [...LEARN_HOOK_KEYS]);
+    hookProfile === "minimal" ||
+    isHookDisabled(disabledHooks, [...LEARN_HOOK_KEYS]);
 
   if (learnHookDisabled) {
     emitHookOutput("");
@@ -544,7 +584,8 @@ async function main() {
   if (!transcriptPath || !fs.existsSync(transcriptPath)) {
     const eventKey = buildEventKey(sessionId, transcriptPath, null);
     const duplicateEvent =
-      prevState.last_session_id === sessionId && prevState.last_event_key === eventKey;
+      prevState.last_session_id === sessionId &&
+      prevState.last_event_key === eventKey;
     if (duplicateEvent) {
       emitHookOutput("");
       return;
@@ -563,19 +604,24 @@ async function main() {
   const transcriptRaw = fs.readFileSync(transcriptPath, "utf8");
   const eventKey = buildEventKey(sessionId, transcriptPath, transcriptRaw);
   const duplicateEvent =
-    prevState.last_session_id === sessionId && prevState.last_event_key === eventKey;
+    prevState.last_session_id === sessionId &&
+    prevState.last_event_key === eventKey;
   if (duplicateEvent) {
     emitHookOutput("");
     return;
   }
 
   const transcript = safeJsonParse(transcriptRaw, { messages: [] });
-  const messages = Array.isArray(transcript.messages) ? transcript.messages : [];
+  const messages = Array.isArray(transcript.messages)
+    ? transcript.messages
+    : [];
   const userTexts = messages
     .filter((msg) => msg?.type === "user")
     .map((msg) => asText(msg?.content ?? msg?.message ?? msg?.text));
 
-  const messageCount = userTexts.filter((text) => normalizeText(text).length > 0).length;
+  const messageCount = userTexts.filter(
+    (text) => normalizeText(text).length > 0,
+  ).length;
   const classification = classifySession(userTexts);
   let reason = "";
   let shouldPrompt = false;
@@ -609,7 +655,9 @@ async function main() {
     ...prevState,
     last_session_id: sessionId,
     last_event_key: eventKey,
-    last_prompted_session_id: shouldPrompt ? sessionId : prevState.last_prompted_session_id || "",
+    last_prompted_session_id: shouldPrompt
+      ? sessionId
+      : prevState.last_prompted_session_id || "",
     last_prompted_at: shouldPrompt ? nowIso : prevState.last_prompted_at || "",
     last_reason: reason,
     last_user_message_count: messageCount,
@@ -628,7 +676,7 @@ main().catch((err) => {
     decision: "allow",
     systemMessage: quietHooks
       ? ""
-      : `[OMG][Learn] monitor-hook error: ${err?.message || String(err)}\n${err?.stack || ''}`,
+      : `[OMG][Learn] monitor-hook error: ${err?.message || String(err)}\n${err?.stack || ""}`,
   };
   process.stdout.write(JSON.stringify(fallback));
 });

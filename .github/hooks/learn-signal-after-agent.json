@@ -1,10 +1,10 @@
 {
-	"hooks": {
-		"PreCompact": [
-			{
-				"type": "command",
-				"command": "node \"${.github}/hooks/scripts/hook-bootstrap.js\" \"${extensionPath}/hooks/scripts/learn.js\"",
-			}
-		]
-	}
+  "hooks": {
+    "PreCompact": [
+      {
+        "type": "command",
+        "command": "node \"${.github}/hooks/scripts/hook-bootstrap.js\" \"${extensionPath}/hooks/scripts/learn.js\""
+      }
+    ]
+  }
 }

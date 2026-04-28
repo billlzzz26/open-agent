@@ -24,6 +24,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error('Hook bootstrap error:', err);
+  console.error("Hook bootstrap error:", err);
   emitHookOutput("");
 });

@@ -305,9 +305,9 @@ function GitHubConnectStep({
                 className="size-8 rounded-full bg-zinc-800"
               />
             ) : (
-               <div className="flex size-8 items-center justify-center rounded-full bg-zinc-800">
-                 <Icon iconNode={github} className="size-4 text-zinc-400" />
-               </div>
+              <div className="flex size-8 items-center justify-center rounded-full bg-zinc-800">
+                <Icon iconNode={github} className="size-4 text-zinc-400" />
+              </div>
             )}
             <div>
               <p className="text-sm font-medium text-zinc-200">

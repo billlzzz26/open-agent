@@ -17,6 +17,7 @@
   "dependencies": {
     "@ai-sdk/elevenlabs": "^2.0.29",
     "@ai-sdk/react": "catalog:",
+    "@lucide/lab": "^0.1.2",
     "@octokit/auth-app": "^8.2.0",
     "@octokit/rest": "^22.0.1",
     "@open-agents/agent": "workspace:*",
@@ -50,7 +51,6 @@
     "ioredis": "^5.9.2",
     "jose": "^6.1.3",
     "lucide-react": "^1.11.0",
-    "@lucide/lab": "^0.1.2",
     "nanoid": "^5.1.6",
     "next": "16.2.3",
     "postgres": "^3.4.8",
