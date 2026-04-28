@@ -24,9 +24,14 @@
     "fix": "ultracite fix",
     "ci": "bun run check && bun run typecheck && bun run test:isolated && bun run --cwd apps/web db:check",
     "test:isolated": "bun run scripts/test-isolated.ts",
-    "test:verbose": "bun test --reporter=junit --reporter-outfile /dev/stdout"
+    "test:verbose": "bun test --reporter=junit --reporter-outfile /dev/stdout",
+    "clean:workspace": "bash scripts/clean-workspace.sh"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
   },
   "devDependencies": {
+    "@shelve/cli": "^5.0.1",
     "oxfmt": "^0.43.0",
     "oxlint": "1.57.0",
     "turbo": "^2.5.4",

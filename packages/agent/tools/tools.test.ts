@@ -1,6 +1,15 @@
-import { afterEach, describe, expect, mock, test } from "bun:test";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  mock,
+  type Mock,
+  test,
+} from "bun:test";
 import { mkdir, mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
+
 import path from "node:path";
 import type { ToolNeedsApprovalFunction } from "./utils";
 
@@ -72,6 +81,7 @@ const { grepTool } = await import("./grep");
 const { readFileTool } = await import("./read");
 const { skillTool } = await import("./skill");
 const { taskTool } = await import("./task");
+const { commitAndPrTool, TIMEOUT_MS } = await import("./github");
 const { todoWriteTool } = await import("./todo");
 const { editFileTool, writeFileTool } = await import("./write");
 const { buildSystemPrompt } = await import("../system-prompt");
@@ -457,6 +467,237 @@ describe("tools execute behavior", () => {
     expect(allowedBuildCommand).toBe(false);
   });
 
+  describe("commitAndPrTool", () => {
+    // ทดสอบเครื่องมือ commit และสร้าง PR
+    let mockSandboxExec: Mock<unknown>;
+    let mockSandbox: {
+      workingDirectory: string;
+      exec: Mock<unknown>;
+    };
+
+    beforeEach(() => {
+      mockSandboxExec = mock(async (command: string) => {
+        if (command.startsWith("git checkout -b")) {
+          return { success: true, exitCode: 0, stdout: "", stderr: "" };
+        }
+        if (command === "git add -A") {
+          return { success: true, exitCode: 0, stdout: "", stderr: "" };
+        }
+        if (command.startsWith("git commit -m")) {
+          return { success: true, exitCode: 0, stdout: "", stderr: "" };
+        }
+        if (command.startsWith("git push -u origin")) {
+          return { success: true, exitCode: 0, stdout: "", stderr: "" };
+        }
+        if (command.startsWith("gh pr create")) {
+          return {
+            success: true,
+            exitCode: 0,
+            stdout: "https://github.com/test/repo/pull/1",
+            stderr: "",
+          };
+        }
+        return {
+          success: false,
+          exitCode: 1,
+          stdout: "",
+          stderr: `Unknown command: ${command}`,
+        };
+      });
+
+      mockSandbox = {
+        workingDirectory: "/repo",
+        exec: mockSandboxExec,
+        readFile: mock(
+          async () =>
+            "---\nname: review\ndescription: review code\n---\nRun review with $ARGUMENTS",
+        ),
+      };
+
+      // Mock getSandbox to return our controlled mockSandbox
+      mock.module("./utils", () => ({
+        getSandbox: mock(async () => mockSandbox),
+      }));
+    });
+
+    function createCommitAndPrContext() {
+      return {
+        sandbox: {
+          state: { type: "vercel" as const, sandboxId: "mock-sandbox-id" },
+          workingDirectory: mockSandbox.workingDirectory,
+        },
+        approval: {},
+        model: "test-model",
+      };
+    }
+
+    test("should successfully commit, push, and create a PR", async () => {
+      const args = {
+        needsApproval: true,
+        branchName: "feature/test-branch",
+        commitMessage: "feat: add new feature",
+        prTitle: "feat: Add new feature",
+        prBody: "This PR adds a new feature.",
+      };
+
+      const result = await commitAndPrTool.execute?.(
+        args,
+        executionOptions(createCommitAndPrContext()),
+      );
+
+      expect(result).toEqual({
+        success: true,
+        message: "Successfully committed, pushed, and created PR.",
+        prUrl: "https://github.com/test/repo/pull/1",
+      });
+
+      expect(mockSandboxExec).toHaveBeenCalledTimes(5);
+      expect(mockSandboxExec).toHaveBeenCalledWith(
+        `git checkout -b 'feature/test-branch'`,
+        mockSandbox.workingDirectory,
+        TIMEOUT_MS,
+        expect.any(Object),
+      );
+      expect(mockSandboxExec).toHaveBeenCalledWith(
+        "git add -A",
+        mockSandbox.workingDirectory,
+        TIMEOUT_MS,
+        expect.any(Object),
+      );
+      expect(mockSandboxExec).toHaveBeenCalledWith(
+        `git commit -m 'feat: add new feature'`,
+        mockSandbox.workingDirectory,
+        TIMEOUT_MS,
+        expect.any(Object),
+      );
+      expect(mockSandboxExec).toHaveBeenCalledWith(
+        `git push -u origin 'feature/test-branch'`,
+        mockSandbox.workingDirectory,
+        TIMEOUT_MS,
+        expect.any(Object),
+      );
+      expect(mockSandboxExec).toHaveBeenCalledWith(
+        `gh pr create --title 'feat: Add new feature' --body 'This PR adds a new feature.'`,
+        mockSandbox.workingDirectory,
+        TIMEOUT_MS,
+        expect.any(Object),
+      );
+    });
+
+    test("should return error if git commit fails for a non-'nothing to commit' reason", async () => {
+      mockSandbox.exec.mockImplementation(async (command: string) => {
+        if (command.startsWith("git commit -m")) {
+          return {
+            success: false,
+            exitCode: 1,
+            stdout: "Commit failed",
+            stderr: "Pre-commit hook failed",
+          };
+        }
+        return { success: true, exitCode: 0, stdout: "", stderr: "" }; // Other commands succeed
+      });
+
+      const args = {
+        needsApproval: true,
+        branchName: "b",
+        commitMessage: "c",
+        prTitle: "p",
+        prBody: "pb",
+      };
+      const result = await commitAndPrTool.execute?.(
+        args,
+        executionOptions(createCommitAndPrContext()),
+      );
+
+      expect(result).toEqual({
+        success: false,
+        error: "Failed to commit: Commit failed Pre-commit hook failed",
+      });
+    });
+
+    test("should return error if git push fails", async () => {
+      mockSandbox.exec.mockImplementation(async (command: string) => {
+        if (command.startsWith("git push -u origin")) {
+          return {
+            success: false,
+            exitCode: 1,
+            stdout: "Push failed",
+            stderr: "Authentication required",
+          };
+        }
+        return { success: true, exitCode: 0, stdout: "", stderr: "" }; // Other commands succeed
+      });
+
+      const args = {
+        needsApproval: true,
+        branchName: "b",
+        commitMessage: "c",
+        prTitle: "p",
+        prBody: "pb",
+      };
+      const result = await commitAndPrTool.execute?.(
+        args,
+        executionOptions(createCommitAndPrContext()),
+      );
+
+      expect(result).toEqual({
+        success: false,
+        error: "Failed to push: Push failed Authentication required",
+      });
+    });
+
+    test("should report partial success if PR creation fails", async () => {
+      mockSandbox.exec.mockImplementation(async (command: string) => {
+        if (command.startsWith("gh pr create")) {
+          return {
+            success: false,
+            exitCode: 1,
+            stdout: "",
+            stderr: "PR creation failed: Missing required fields",
+          };
+        }
+        return { success: true, exitCode: 0, stdout: "", stderr: "" }; // Other commands succeed
+      });
+
+      const args = {
+        needsApproval: true,
+        branchName: "b",
+        commitMessage: "c",
+        prTitle: "p",
+        prBody: "pb",
+      };
+      const result = await commitAndPrTool.execute?.(
+        args,
+        executionOptions(createCommitAndPrContext()),
+      );
+
+      expect(result).toEqual({
+        success: true,
+        message:
+          "Successfully committed and pushed to branch b. Note: Could not create PR automatically via gh CLI. Please create it manually.",
+        errorDetails: "PR creation failed: Missing required fields",
+      });
+    });
+
+    test("needsApproval should always return true", async () => {
+      const args = {
+        needsApproval: true,
+        branchName: "feature/test-branch",
+        commitMessage: "feat: add new feature",
+        prTitle: "feat: Add new feature",
+        prBody: "This PR adds a new feature.",
+      };
+
+      const approvalResult = await getNeedsApprovalResult(
+        commitAndPrTool.needsApproval,
+        args,
+        createCommitAndPrContext(),
+      );
+
+      expect(approvalResult).toBe(true);
+    });
+  });
+
   afterEach(() => {
     sandboxRegistry.clear();
   });
@@ -478,6 +719,10 @@ describe("tools execute behavior", () => {
         };
       },
     };
+
+    mock.module("./utils", () => ({
+      getSandbox: mock(async () => sandbox),
+    }));
 
     const context = createContext(sandbox);
 
@@ -541,6 +786,10 @@ describe("tools execute behavior", () => {
       readFile: async () =>
         "---\nname: review\ndescription: review code\n---\nRun review with $ARGUMENTS",
     };
+
+    mock.module("./utils", () => ({
+      getSandbox: mock(async () => sandbox),
+    }));
 
     const result = await skillTool.execute?.(
       { skill: "Review", args: "--quick" },
@@ -673,5 +922,179 @@ describe("tools execute behavior", () => {
       message: "Updated task list with 2 items",
       todos,
     });
+  });
+});
+
+test("askUserQuestionTool formats structured answers", () => {
+  const answerOutput = askUserQuestionTool.toModelOutput?.({
+    toolCallId: "tool-call-1",
+    input: { questions: [] },
+    output: {
+      answers: {
+        "Which package manager?": "bun",
+        "Which checks?": ["typecheck", "test"],
+      },
+    },
+  });
+
+  expect(answerOutput).toEqual({
+    type: "text",
+    value:
+      'User has answered your questions: "Which package manager?"="bun", "Which checks?"="typecheck, test". You can now continue with the user\'s answers in mind.',
+  });
+
+  const declinedOutput = askUserQuestionTool.toModelOutput?.({
+    toolCallId: "tool-call-1",
+    input: { questions: [] },
+    output: { declined: true },
+  });
+
+  expect(declinedOutput).toEqual({
+    type: "text",
+    value:
+      "User declined to answer questions. You should continue without this information or ask in a different way.",
+  });
+});
+
+test("skillTool loads skill content and substitutes arguments", async () => {
+  const sandbox = {
+    workingDirectory: "/repo",
+    readFile: async () =>
+      "---\nname: review\ndescription: review code\n---\nRun review with $ARGUMENTS",
+  };
+
+  mock.module("./utils", () => ({
+    getSandbox: mock(async () => sandbox),
+  }));
+
+  const result = await skillTool.execute?.(
+    { skill: "Review", args: "--quick" },
+    executionOptions({
+      ...createContext(sandbox),
+      skills: [
+        {
+          name: "review",
+          description: "Review code changes",
+          path: "/repo/.skills/review",
+          filename: "SKILL.md",
+          options: {},
+        },
+      ],
+    }),
+  );
+
+  expect(result).toEqual({
+    success: true,
+    skillName: "Review",
+    skillPath: "/repo/.skills/review",
+    content: "Skill directory: /repo/.skills/review\n\nRun review with --quick",
+  });
+});
+
+test("skillTool returns helpful errors for missing or disabled skills", async () => {
+  const sandbox = {
+    workingDirectory: "/repo",
+    readFile: async () => "skill-body",
+  };
+
+  const missingResult = await skillTool.execute?.(
+    { skill: "unknown" },
+    executionOptions({ ...createContext(sandbox), skills: [] }),
+  );
+
+  expect(missingResult).toEqual({
+    success: false,
+    error: "Skill 'unknown' not found. Available skills: none",
+  });
+
+  const disabledResult = await skillTool.execute?.(
+    { skill: "commit" },
+    executionOptions({
+      ...createContext(sandbox),
+      skills: [
+        {
+          name: "commit",
+          description: "Create a commit",
+          path: "/repo/.skills/commit",
+          filename: "SKILL.md",
+          options: { disableModelInvocation: true },
+        },
+      ],
+    }),
+  );
+
+  expect(disabledResult).toEqual({
+    success: false,
+    error:
+      "Skill 'commit' cannot be invoked by the model (disable-model-invocation is set)",
+  });
+});
+
+test("taskTool exposes both subagent types without approval gates", async () => {
+  const explorerNeedsApproval = await getNeedsApprovalResult(
+    taskTool.needsApproval,
+    {
+      subagentType: "explorer",
+      task: "Find usages",
+      instructions: "Search for helper usage",
+    },
+    {
+      sandbox: { workingDirectory: "/repo" },
+      model: "test-model",
+      approval: {},
+    },
+  );
+  expect(explorerNeedsApproval).toBe(false);
+
+  const executorNeedsApproval = await getNeedsApprovalResult(
+    taskTool.needsApproval,
+    {
+      subagentType: "executor",
+      task: "Apply changes",
+      instructions: "Update files",
+    },
+    {
+      sandbox: { workingDirectory: "/repo" },
+      model: "test-model",
+      approval: {},
+    },
+  );
+  expect(executorNeedsApproval).toBe(false);
+});
+
+test("taskTool description lists subagents from the shared registry", () => {
+  expect(taskTool.description).toContain(
+    "`explorer` - Use for read-only codebase exploration, tracing behavior, and answering questions without changing files",
+  );
+  expect(taskTool.description).toContain(
+    "`executor` - Use for well-scoped implementation work, including edits, scaffolding, refactors, and other file changes",
+  );
+  expect(taskTool.description).toContain("up to 100 tool steps");
+});
+
+test("buildSystemPrompt lists subagents from the shared registry", () => {
+  const prompt = buildSystemPrompt({});
+
+  expect(prompt).toContain("Available subagents:");
+  expect(prompt).toContain(
+    "`explorer` - Use for read-only codebase exploration, tracing behavior, and answering questions without changing files",
+  );
+  expect(prompt).toContain(
+    "`executor` - Use for well-scoped implementation work, including edits, scaffolding, refactors, and other file changes",
+  );
+});
+
+test("todoWriteTool returns updated todo list metadata", async () => {
+  const todos = [
+    { id: "1", content: "Write tests", status: "in_progress" as const },
+    { id: "2", content: "Run checks", status: "pending" as const },
+  ];
+
+  const result = await todoWriteTool.execute?.({ todos }, executionOptions());
+
+  expect(result).toEqual({
+    success: true,
+    message: "Updated task list with 2 items",
+    todos,
   });
 });

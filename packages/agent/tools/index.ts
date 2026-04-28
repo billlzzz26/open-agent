@@ -22,4 +22,8 @@ export {
 } from "./ask-user-question";
 export { skillTool, type SkillToolInput } from "./skill";
 export { webFetchTool } from "./fetch";
+<<<<<<< HEAD
 export { kiloTool } from "./kilo";
+=======
+export { commitAndPrTool } from "./github";
+>>>>>>> origin/main
