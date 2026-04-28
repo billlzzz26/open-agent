@@ -6,6 +6,12 @@
     "esbenp.prettier-vscode",
     "EditorConfig.EditorConfig",
     "GitHub.copilot",
-    "GitHub.copilot-chat"
+    "GitHub.copilot-chat",
+    "ms-vscode.vscode-json",
+    "ms-vscode-remote.remote-containers",
+    "ms-vscode.vscode-eslint",
+    "ms-vscode.vscode-css-peek",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense"
   ]
 }

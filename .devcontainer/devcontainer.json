@@ -1,13 +1,15 @@
 {
   "name": "Open Agents",
   "build": {
-    "context": ".",
+    "context": "..",
     "dockerfile": ".devcontainer/Dockerfile",
     "args": {
       "BUN_VERSION": "1.3.13"
     }
   },
-  "forwardPorts": [3000],
+  "forwardPorts": [
+    3000
+  ],
   "portsAttributes": {
     "3000": {
       "label": "Web App",
@@ -16,21 +18,15 @@
   },
   "customizations": {
     "vscode": {
-      "extensions": [
-        "oxc.oxc-vscode",
-        "bradlc.vscode-tailwindcss",
-        "ms-vscode.vscode-typescript-next",
-        "esbenp.prettier-vscode",
-        "EditorConfig.EditorConfig"
-      ]
+      "extensions": []
     }
   },
   "settings": {
-    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnPaste": true,
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.fixAll.oxc": "explicit"
+      "source.fixAll.eslint": "explicit"
     },
     "typescript.tsdk": "node_modules/typescript/lib",
     "emmet.showExpandedAbbreviation": "never"

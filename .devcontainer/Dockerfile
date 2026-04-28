@@ -26,6 +26,8 @@ RUN curl -fsSL https://github.com/astral-sh/uv/releases/latest/download/uv-x86_6
   && chmod +x /usr/local/bin/uv \
   && uv --version
 
+ENV PATH="/usr/local/bin:$PATH"
+
 # Install Modal CLI
 RUN pip3 install modal \
   && modal --version

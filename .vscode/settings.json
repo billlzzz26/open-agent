@@ -32,7 +32,7 @@
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[markdown]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
   },
   "[scss]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
@@ -78,5 +78,8 @@
         "copilot/gpt-5-mini"
       ]
     }
+  },
+  "[dockerfile]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-containers"
   }
 }
