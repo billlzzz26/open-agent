@@ -9,7 +9,7 @@ export type ChatCompletionRequest = {
   frequency_penalty?: number;
   presence_penalty?: number;
   tools?: Tool[];
-  tool_choice?: ToolChoice;
+  toolChoice?: ToolChoice;
   response_format?: ResponseFormat;
   user?: string;
   seed?: number;
@@ -18,7 +18,7 @@ export type ChatCompletionRequest = {
 export type Message =
   | { role: "system"; content: string }
   | { role: "user"; content: string | ContentPart[] }
-  | { role: "assistant"; content: string | null; tool_calls?: ToolCall[] }
+  | { role: "assistant"; content: string | null; toolCalls?: ToolCall[] }
   | { role: "tool"; content: string; tool_call_id: string };
 
 export type ContentPart =

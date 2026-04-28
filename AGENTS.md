@@ -76,6 +76,7 @@ git add "apps/web/app/tasks/[id]/page.tsx"
 ## Architecture (Summary)
 
 Three-layer system:
+
 ```
 Web (Next.js 16) -> Agent (ToolLoopAgent from AI SDK) -> Sandbox (Vercel execution environment)
 ```

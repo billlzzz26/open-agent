@@ -78,10 +78,10 @@ HOW TO USE:
   }),
   outputSchema: delegateTaskOutputSchema,
   execute: async function* ({ tasks }, { experimental_context, abortSignal }) {
-    const sandboxContext = getSandboxContext(
+    const sandboxContexts = tasks.map(() => getSandboxContext(
       experimental_context,
       "delegateTask",
-    );
+    ));
     const model = getSubagentModel(experimental_context, "delegateTask");
     const subagentModelId = typeof model === "string" ? model : model.modelId;
     const startedAt = Date.now();
@@ -111,7 +111,7 @@ HOW TO USE:
         options: {
           task: taskInput.task,
           instructions: taskInput.instructions,
-          sandbox: sandboxContext.sandbox,
+          sandbox: sandboxContexts[index].sandbox,
           model,
         },
         abortSignal,
@@ -136,7 +136,7 @@ HOW TO USE:
 
     // Run all tasks in parallel
     const promises = tasks.map((t, i) => runTask(t, i));
-    await Promise.all(promises);
+    await Promise.allSettled(promises);
 
     const totalToolCallCount = taskStates.reduce(
       (acc, t) => acc + t.toolCallCount,

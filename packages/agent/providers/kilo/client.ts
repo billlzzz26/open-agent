@@ -84,6 +84,23 @@ export type FIMRequest = {
   stream?: boolean;
 };
 
+export type FIMResponse = {
+  id: string;
+  object: "text_completion";
+  created: number;
+  model: string;
+  choices: Array<{
+    text: string;
+    index: number;
+    finish_reason: string;
+  }>;
+  usage: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+};
+
 export type Model = {
   id: string;
   object: "model";
@@ -151,8 +168,8 @@ export class KiloClient {
     );
   }
 
-  async fimCompletions(body: FIMRequest): Promise<any> {
-    return this.request<any>("/api/fim/completions", {
+  async fimCompletions(body: FIMRequest): Promise<FIMResponse> {
+    return this.request<FIMResponse>("/api/fim/completions", {
       method: "POST",
       body: JSON.stringify(body),
     });

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { getSandbox, shellEscape } from "./utils";
 
 // หมดเวลาในการดำเนินการคำสั่ง git และ gh
-export const TIMEOUT_MS = 60_000;
+export const timeoutMs = 60_000;
 
 export const commitAndPrTool = tool({
   description: `Commit all current changes, push to a new branch, and create a Pull Request using the GitHub CLI.
@@ -42,7 +42,7 @@ USAGE:
       const branchRes = await sandbox.exec(
         `git checkout -b ${shellEscape(branchName)}`,
         cwd,
-        TIMEOUT_MS,
+        timeoutMs,
         { signal: abortSignal },
       );
 
@@ -58,7 +58,7 @@ USAGE:
       }
 
       // 2. Stage all changes
-      await sandbox.exec("git add -A", cwd, TIMEOUT_MS, {
+      await sandbox.exec("git add -A", cwd, timeoutMs, {
         signal: abortSignal,
       });
 
@@ -66,7 +66,7 @@ USAGE:
       const commitRes = await sandbox.exec(
         `git commit -m ${shellEscape(commitMessage)}`,
         cwd,
-        TIMEOUT_MS,
+        timeoutMs,
         { signal: abortSignal },
       );
 
@@ -85,7 +85,7 @@ USAGE:
       const pushRes = await sandbox.exec(
         `git push -u origin ${shellEscape(branchName)}`,
         cwd,
-        TIMEOUT_MS,
+        timeoutMs,
         { signal: abortSignal },
       );
 
@@ -101,7 +101,7 @@ USAGE:
       const prRes = await sandbox.exec(
         `gh pr create --title ${shellEscape(prTitle)} ${bodyArg}`,
         cwd,
-        TIMEOUT_MS,
+        timeoutMs,
         { signal: abortSignal },
       );
 
