@@ -4,7 +4,8 @@ import { useCallback, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, Github, Loader2 } from "lucide-react";
+import { Check, Loader2, Icon } from "lucide-react";
+import { github } from "@lucide/lab";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/hooks/use-session";
@@ -304,9 +305,9 @@ function GitHubConnectStep({
                 className="size-8 rounded-full bg-zinc-800"
               />
             ) : (
-              <div className="flex size-8 items-center justify-center rounded-full bg-zinc-800">
-                <Github className="size-4 text-zinc-400" />
-              </div>
+               <div className="flex size-8 items-center justify-center rounded-full bg-zinc-800">
+                 <Icon iconNode={github} className="size-4 text-zinc-400" />
+               </div>
             )}
             <div>
               <p className="text-sm font-medium text-zinc-200">
@@ -345,7 +346,7 @@ function GitHubConnectStep({
           className="gap-2 border-zinc-700 bg-transparent text-zinc-300 hover:bg-white/5 hover:text-white"
         >
           <Link href={githubInstallHref}>
-            <Github className="size-4" />
+            <Icon iconNode={github} className="size-4" />
             Install GitHub App
           </Link>
         </Button>
@@ -376,7 +377,7 @@ function GitHubConnectStep({
         {isLinking ? (
           <Loader2 className="size-4 animate-spin" />
         ) : (
-          <Github className="size-4" />
+          <Icon iconNode={github} className="size-4" />
         )}
         {forceReconnect ? "Reconnect GitHub" : "Connect GitHub"}
       </Button>

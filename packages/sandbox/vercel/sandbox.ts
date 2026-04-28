@@ -111,15 +111,22 @@ function buildAuthenticatedGitHubUrl(
   repoUrl: string,
   token: string,
 ): string | null {
+  // Match GitHub URL patterns to avoid REDOS vulnerability
+  // Matches: github.com/:owner/:repo or github.com/:owner/:repo.git
   const githubUrlMatch = repoUrl.match(
-    /github\.com[/:]([^/]+)\/([^/]+?)(?:\.git)?$/,
+    /^.*?github\.com[/:]([^/]+?)\/([^/]+?)(?:\.git)?$/,
   );
-
   if (!githubUrlMatch) {
     return null;
   }
 
   const [, owner, repo] = githubUrlMatch;
+
+  // Validate that owner and repo are non-empty
+  if (!owner || !repo) {
+    return null;
+  }
+
   return `https://x-access-token:${token}@github.com/${owner}/${repo}.git`;
 }
 

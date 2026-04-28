@@ -26,7 +26,12 @@
     },
     {
       "description": "Group React and React DOM — must stay in sync",
-      "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom"],
+      "matchPackageNames": [
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom"
+      ],
       "groupName": "React",
       "automerge": false
     },
