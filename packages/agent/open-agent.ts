@@ -23,7 +23,6 @@ import {
   todoWriteTool,
   webFetchTool,
   writeFileTool,
-  kiloTool,
 } from "./tools";
 
 export interface AgentModelSelection {
@@ -77,7 +76,6 @@ const tools = {
   ask_user_question: askUserQuestionTool,
   skill: skillTool,
   web_fetch: webFetchTool,
-  kilo: kiloTool,
 } satisfies ToolSet;
 
 export const openAgent = new ToolLoopAgent({

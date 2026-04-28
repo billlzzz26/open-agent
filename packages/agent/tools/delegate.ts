@@ -20,13 +20,9 @@ const delegateTaskSchema = z.object({
   subagentType: subagentTypeSchema.describe(
     `Subagent to launch. Available options:\n${subagentSummaryLines}`,
   ),
-<<<<<<< HEAD
-  task: z.string().describe("Short description of the task (displayed to user)"),
-=======
   task: z
     .string()
     .describe("Short description of the task (displayed to user)"),
->>>>>>> origin/main
   instructions: z.string().describe(
     `Detailed instructions for the subagent. Include:
 - Goal and deliverables
@@ -44,11 +40,7 @@ export const delegateTaskOutputSchema = z.object({
       toolCallCount: z.number(),
       final: z.custom<ModelMessage[]>().optional(),
       usage: z.custom<LanguageModelUsage>().optional(),
-<<<<<<< HEAD
-    })
-=======
     }),
->>>>>>> origin/main
   ),
   totalToolCallCount: z.number().int().nonnegative().optional(),
   startedAt: z.number().int().nonnegative().optional(),
@@ -78,18 +70,6 @@ HOW TO USE:
 - Choose the appropriate subagentType for each task.
 - Be explicit and concrete - subagents cannot ask clarifying questions.`,
   inputSchema: z.object({
-<<<<<<< HEAD
-    tasks: z.array(delegateTaskSchema).min(1).max(5).describe(
-      "Tasks to run in parallel. Each gets its own subagent."
-    ),
-  }),
-  outputSchema: delegateTaskOutputSchema,
-  execute: async function* (
-    { tasks },
-    { experimental_context, abortSignal },
-  ) {
-    const sandboxContext = getSandboxContext(experimental_context, "delegateTask");
-=======
     tasks: z
       .array(delegateTaskSchema)
       .min(1)
@@ -102,7 +82,6 @@ HOW TO USE:
       experimental_context,
       "delegateTask",
     );
->>>>>>> origin/main
     const model = getSubagentModel(experimental_context, "delegateTask");
     const subagentModelId = typeof model === "string" ? model : model.modelId;
     const startedAt = Date.now();
@@ -122,21 +101,13 @@ HOW TO USE:
       startedAt,
     };
 
-<<<<<<< HEAD
-    const runTask = async (taskInput: typeof tasks[0], index: number) => {
-=======
     const runTask = async (taskInput: (typeof tasks)[0], index: number) => {
->>>>>>> origin/main
       const state = taskStates[index];
       if (!state) return;
       const subagent = SUBAGENT_REGISTRY[taskInput.subagentType].agent;
       const result = await subagent.stream({
-<<<<<<< HEAD
-        prompt: "Complete this task and provide a summary of what you accomplished.",
-=======
         prompt:
           "Complete this task and provide a summary of what you accomplished.",
->>>>>>> origin/main
         options: {
           task: taskInput.task,
           instructions: taskInput.instructions,
@@ -167,14 +138,10 @@ HOW TO USE:
     const promises = tasks.map((t, i) => runTask(t, i));
     await Promise.all(promises);
 
-<<<<<<< HEAD
-    const totalToolCallCount = taskStates.reduce((acc, t) => acc + t.toolCallCount, 0);
-=======
     const totalToolCallCount = taskStates.reduce(
       (acc, t) => acc + t.toolCallCount,
       0,
     );
->>>>>>> origin/main
 
     yield {
       results: taskStates,
@@ -192,13 +159,9 @@ HOW TO USE:
       let contentValue = "Task completed without detailed summary.";
 
       if (messages) {
-<<<<<<< HEAD
-        const lastAssistantMessage = messages.findLast((p) => p.role === "assistant");
-=======
         const lastAssistantMessage = messages.findLast(
           (p) => p.role === "assistant",
         );
->>>>>>> origin/main
         const content = lastAssistantMessage?.content;
 
         if (content) {
