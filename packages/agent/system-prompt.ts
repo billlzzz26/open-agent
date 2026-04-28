@@ -22,6 +22,78 @@ function detectModelFamily(modelId: string | undefined): ModelFamily {
   return "other";
 }
 
+/**
+ * Detects if the given model ID is a Kilo AI Gateway model.
+ * Kilo models use the format "provider/model-name" (e.g. "anthropic/claude-sonnet-4.6")
+ * or the special "kilo-auto/*" virtual models that auto-select the best underlying model.
+ */
+function isKiloModel(modelId: string | undefined): boolean {
+  if (!modelId) return false;
+  // kilo-auto/* virtual models
+  if (modelId.startsWith("kilo-auto/")) return true;
+  // provider/model-name format with a slash
+  return modelId.includes("/");
+}
+
+/**
+ * Gets the model display name for a given model ID.
+ * For Kilo Gateway models, returns the full model ID.
+ * For non-Kilo models (e.g. local ollama), returns the model ID as-is.
+ */
+function getModelDisplayName(modelId: string | undefined): string {
+  if (!modelId) return "(no model specified)";
+  if (isKiloModel(modelId)) {
+    // Map auto models to friendly names
+    if (modelId === "kilo-auto/frontier") return "kilo-auto/frontier (Claude Opus 4.7 / Sonnet 4.6)";
+    if (modelId === "kilo-auto/balanced") return "kilo-auto/balanced (Qwen 3.6+ / GPT-5.3-codex / Claude Haiku 4.5)";
+    if (modelId === "kilo-auto/free") return "kilo-auto/free (curated free models)";
+    if (modelId === "kilo-auto/small") return "kilo-auto/small (Gemma 4 31B/26B)";
+  }
+  return modelId;
+}
+
+// ---------------------------------------------------------------------------
+// Available Kilo AI Gateway Models Reference
+// ---------------------------------------------------------------------------
+//
+// The Kilo AI Gateway provides access to hundreds of AI models through a
+// single unified API. Models are specified using the format:
+//
+//   provider/model-name
+//
+// Example: "anthropic/claude-sonnet-4.6", "openai/gpt-5.4"
+//
+// Auto models (kilo-auto/*) automatically select the best model based on
+// task type and the x-kilocode-mode header:
+//
+//  - kilo-auto/frontier — Highest performance (Claude Opus 4.7, Sonnet 4.6)
+//  - kilo-auto/balanced — Price/capability balance (Qwen 3.6+, GPT-5.3-codex, Claude Haiku 4.5)
+//  - kilo-auto/free     — Free tier models (rate-limited)
+//  - kilo-auto/small    — Fast small models for summaries/background tasks
+//
+// Popular models:
+//  - anthropic/claude-opus-4.7      — Most capable Claude for complex reasoning
+//  - anthropic/claude-sonnet-4.6    — Balanced performance and cost
+//  - anthropic/claude-haiku-4.5     — Fast and cost-effective
+//  - openai/gpt-5.4                 — Latest GPT model
+//  - openai/gpt-5.4-mini            — Fast and efficient
+//  - google/gemini-3.1-pro-preview  — Advanced reasoning
+//  - google/gemini-2.5-flash        — Fast and efficient
+//  - x-ai/grok-4                    — Most capable Grok model
+//  - x-ai/grok-code-fast-1          — Optimized for code tasks
+//  - deepseek/deepseek-v3.2         — Strong coding and reasoning
+//  - moonshotai/kimi-k2.5           — Strong coding and multilingual
+//
+// Free models available at no cost (subject to rate limits):
+//  - bytedance-seed/dola-seed-2.0-pro:free
+//  - x-ai/grok-code-fast-1:optimized:free
+//  - nvidia/nemotron-3-super-120b-a12b:free
+//  - arcee-ai/trinity-large-thinking:free
+//  - openrouter/free
+//
+// See: https://api.kilo.ai/api/gateway/models (no auth required)
+// ---------------------------------------------------------------------------
+
 // ---------------------------------------------------------------------------
 // Core system prompt -- shared across all model families
 // ---------------------------------------------------------------------------

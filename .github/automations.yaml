@@ -1,0 +1,42 @@
+version: "1.0"
+tasks:
+  - id: install-dependencies
+    label: "Install dependencies"
+    description: "Install Bun dependencies for the monorepo."
+    command: "bun install --frozen-lockfile"
+
+  - id: dev-web
+    label: "Run web dev server"
+    description: "Start the web app development server on localhost:3000."
+    command: "bun run web"
+    runInBackground: true
+
+  - id: lint-format
+    label: "Lint & format"
+    description: "Run repository lint and formatting checks."
+    command: "bun run fix"
+
+  - id: typecheck
+    label: "Typecheck"
+    description: "Run TypeScript type checking across the monorepo."
+    command: "bun run typecheck"
+
+  - id: test
+    label: "Run tests"
+    description: "Run the repository test suite."
+    command: "bun test"
+
+  - id: ci
+    label: "Run CI checks"
+    description: "Run the full CI validation suite."
+    command: "bun run ci"
+
+  - id: db-generate-migration
+    label: "DB: Generate migration"
+    description: "Generate a new Drizzle migration for the web app database."
+    command: "bun run --cwd apps/web db:generate"
+
+  - id: db-studio
+    label: "DB: Studio"
+    description: "Launch the Drizzle DB Studio for local database exploration."
+    command: "bun run --cwd apps/web db:studio"

@@ -26,7 +26,7 @@
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[jsonc]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
+    "editor.defaultFormatter": "vscode.json-language-features"
   },
   "[less]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
@@ -50,9 +50,22 @@
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "[yaml]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "editor.codeActionsOnSave": {
     "source.fixAll.oxc": "explicit"
+  },
+  "ai.experimental.models": {
+    "inlineCompletions": "anthropic/claude-sonnet-4.6",
+    "autocomplete": "anthropic/claude-haiku-4.5",
+    "chat": "anthropic/claude-sonnet-4.6"
+  },
+  "inlineChat.mode": "live",
+  "inlineChat.showToolbar": "always",
+  "[prompt]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[chatagent]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

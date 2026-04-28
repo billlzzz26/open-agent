@@ -1,6 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
-import { KiloClient } from "../kilo/client";
+import { KiloClient } from "../providers/kilo/client";
 
 const kiloInputSchema = z.object({
   action: z.enum(["list_models", "list_providers", "chat_completions", "fim_completions"]),
@@ -13,7 +13,7 @@ const kiloInputSchema = z.object({
 });
 
 export const kiloTool = tool({
-  description: `Interact with the Kilo AI Gateway. 
+  description: `Interact with the Kilo AI Gateway.
 Supports:
 - list_models: Retrieve the list of available models.
 - list_providers: Retrieve the list of available providers.

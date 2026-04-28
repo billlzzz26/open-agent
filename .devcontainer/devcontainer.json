@@ -2,7 +2,10 @@
   "name": "Open Agents",
   "build": {
     "context": ".",
-    "dockerfile": "Dockerfile"
+    "dockerfile": ".devcontainer/Dockerfile",
+    "args": {
+      "BUN_VERSION": "1.3.13"
+    }
   },
   "forwardPorts": [3000],
   "portsAttributes": {
@@ -17,8 +20,20 @@
         "oxc.oxc-vscode",
         "bradlc.vscode-tailwindcss",
         "ms-vscode.vscode-typescript-next",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "EditorConfig.EditorConfig"
       ]
     }
-  }
+  },
+  "settings": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.oxc": "explicit"
+    },
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "emmet.showExpandedAbbreviation": "never"
+  },
+  "postCreateCommand": "bun install --frozen-lockfile"
 }
